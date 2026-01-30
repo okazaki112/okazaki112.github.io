@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="个人博客 - 分享技术与生活">
+    <meta name="keywords" content="博客, 技术, 生活, 编程">
+    <meta name="author" content="陈刀仔">
+    <title>我的博客 - 记录生活与成长</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 跳过导航链接 -->
+    <a href="#main-content" class="skip-link">跳转到主要内容</a>
+    
+    <!-- 导航栏 -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <a href="#" class="nav__logo">
+                    <span class="nav__logo-text">刀仔的博客</span>
+                </a>
+                
+                <ul class="nav__menu">
+                    <li class="nav__item">
+                        <a href="#home" class="nav__link nav__link--active">首页</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#articles" class="nav__link">文章</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#about" class="nav__link">关于</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#contact" class="nav__link">联系</a>
+                    </li>
+                </ul>
+                
+                <div class="nav__actions">
+                    <button class="theme-toggle" aria-label="切换主题" data-theme-toggle>
+                        <span class="theme-toggle__icon theme-toggle__icon--sun">
+                            <span class="iconify" data-icon="ph:sun-bold"></span>
+                        </span>
+                        <span class="theme-toggle__icon theme-toggle__icon--moon">
+                            <span class="iconify" data-icon="ph:moon-bold"></span>
+                        </span>
+                    </button>
+                    
+                    <button class="nav__toggle" aria-label="切换菜单" data-nav-toggle>
+                        <span class="iconify" data-icon="ph:list-bold"></span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- 主要内容 -->
+    <main id="main-content">
+        <!-- Hero区域 -->
+        <section id="home" class="hero">
+            <div class="hero__container">
+                <div class="hero__content">
+                    <h1 class="hero__title">
+                        记录成长<br>
+                        <span class="hero__title--highlight">分享技术</span>
+                    </h1>
+                    <p class="hero__description">
+                        我是陈刀仔，一个热爱编程的开发者。在这里分享技术心得、生活感悟和有趣的想法。
+                    </p>
+                    <div class="hero__actions">
+                        <a href="#articles" class="btn btn--primary">
+                            阅读文章
+                            <span class="iconify" data-icon="ph:arrow-right-bold"></span>
+                        </a>
+                        <a href="#about" class="btn btn--secondary">了解更多</a>
+                    </div>
+                </div>
+                <div class="hero__image">
+                    <div class="hero__image-wrapper">
+                        <img src="https://picsum.photos/600/600?random=1" alt="个人头像" loading="eager">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 文章列表 -->
+        <section id="articles" class="articles">
+            <div class="articles__container">
+                <div class="section__header">
+                    <h2 class="section__title">最新文章</h2>
+                    <p class="section__description">分享技术心得与实践经验</p>
+                </div>
+                
+                <div class="articles__grid">
+                    <!-- 文章卡片 1 -->
+                    <article class="card">
+                        <div class="card__image">
+                            <img src="https://picsum.photos/800/600?random=2" alt="文章封面" loading="lazy">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__meta">
+                                <span class="card__tag">前端开发</span>
+                                <time class="card__date" datetime="2024-01-15">2024年1月15日</time>
+                            </div>
+                            <h3 class="card__title">
+                                <a href="#">深入理解 JavaScript 闭包</a>
+                            </h3>
+                            <p class="card__description">
+                                闭包是JavaScript中最强大的特性之一。本文将从基础概念讲起，深入探讨闭包的工作原理和实际应用场景。
+                            </p>
+                            <a href="#" class="card__link">
+                                阅读全文
+                                <span class="iconify" data-icon="ph:arrow-right-bold"></span>
+                            </a>
+                        </div>
+                    </article>
+                    
+                    <!-- 文章卡片 2 -->
+                    <article class="card">
+                        <div class="card__image">
+                            <img src="https://picsum.photos/800/600?random=3" alt="文章封面" loading="lazy">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__meta">
+                                <span class="card__tag">性能优化</span>
+                                <time class="card__date" datetime="2024-01-10">2024年1月10日</time>
+                            </div>
+                            <h3 class="card__title">
+                                <a href="#">前端性能优化实战指南</a>
+                            </h3>
+                            <p class="card__description">
+                                从加载速度到渲染性能，全方位解析前端性能优化的技巧和最佳实践，让你的网页飞起来。
+                            </p>
+                            <a href="#" class="card__link">
+                                阅读全文
+                                <span class="iconify" data-icon="ph:arrow-right-bold"></span>
+                            </a>
+                        </div>
+                    </article>
+                    
+                    <!-- 文章卡片 3 -->
+                    <article class="card">
+                        <div class="card__image">
+                            <img src="https://picsum.photos/800/600?random=4" alt="文章封面" loading="lazy">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__meta">
+                                <span class="card__tag">CSS技巧</span>
+                                <time class="card__date" datetime="2024-01-05">2024年1月5日</time>
+                            </div>
+                            <h3 class="card__title">
+                                <a href="#">现代CSS布局技巧</a>
+                            </h3>
+                            <p class="card__description">
+                                Flexbox和Grid彻底改变了网页布局。本文将介绍这两种布局技术的核心概念和实用技巧。
+                            </p>
+                            <a href="#" class="card__link">
+                                阅读全文
+                                <span class="iconify" data-icon="ph:arrow-right-bold"></span>
+                            </a>
+                        </div>
+                    </article>
+                    
+                    <!-- 文章卡片 4 -->
+                    <article class="card">
+                        <div class="card__image">
+                            <img src="https://picsum.photos/800/600?random=5" alt="文章封面" loading="lazy">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__meta">
+                                <span class="card__tag">开发工具</span>
+                                <time class="card__date" datetime="2024-01-01">2024年1月1日</time>
+                            </div>
+                            <h3 class="card__title">
+                                <a href="#">提升开发效率的VS Code技巧</a>
+                            </h3>
+                            <p class="card__description">
+                                分享一些VS Code的高级技巧和实用插件，帮助你提升开发效率，编写更高质量的代码。
+                            </p>
+                            <a href="#" class="card__link">
+                                阅读全文
+                                <span class="iconify" data-icon="ph:arrow-right-bold"></span>
+                            </a>
+                        </div>
+                    </article>
+                    
+                    <!-- 文章卡片 5 -->
+                    <article class="card">
+                        <div class="card__image">
+                            <img src="https://picsum.photos/800/600?random=6" alt="文章封面" loading="lazy">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__meta">
+                                <span class="card__tag">设计</span>
+                                <time class="card__date" datetime="2023-12-28">2023年12月28日</time>
+                            </div>
+                            <h3 class="card__title">
+                                <a href="#">UI设计原则与实践</a>
+                            </h3>
+                            <p class="card__description">
+                                探讨现代UI设计的核心原则，包括色彩、排版、布局等方面的最佳实践。
+                            </p>
+                            <a href="#" class="card__link">
+                                阅读全文
+                                <span class="iconify" data-icon="ph:arrow-right-bold"></span>
+                            </a>
+                        </div>
+                    </article>
+                    
+                    <!-- 文章卡片 6 -->
+                    <article class="card">
+                        <div class="card__image">
+                            <img src="https://picsum.photos/800/600?random=7" alt="文章封面" loading="lazy">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__meta">
+                                <span class="card__tag">生活感悟</span>
+                                <time class="card__date" datetime="2023-12-25">2023年12月25日</time>
+                            </div>
+                            <h3 class="card__title">
+                                <a href="#">2023年终总结</a>
+                            </h3>
+                            <p class="card__description">
+                                回顾过去一年的成长与收获，展望未来的目标和计划。感谢每一个陪伴我成长的人。
+                            </p>
+                            <a href="#" class="card__link">
+                                阅读全文
+                                <span class="iconify" data-icon="ph:arrow-right-bold"></span>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 关于我 -->
+        <section id="about" class="about">
+            <div class="about__container">
+                <div class="about__content">
+                    <h2 class="section__title">关于我</h2>
+                    <p class="about__text">
+                        我是陈刀仔，一名充满热情的前端开发者。我热爱编程，喜欢探索新技术，
+                        更喜欢将复杂的技术以简单易懂的方式分享给大家。
+                    </p>
+                    <p class="about__text">
+                        在这个博客里，我会分享我的技术学习心得、项目经验以及一些生活中的感悟。
+                        希望我的文章能够帮助到你，也期待与你交流讨论。
+                    </p>
+                    <div class="about__skills">
+                        <h3 class="about__skills-title">技术栈</h3>
+                        <div class="about__skills-list">
+                            <span class="skill-tag">HTML5</span>
+                            <span class="skill-tag">CSS3</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Vue</span>
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">TypeScript</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about__image">
+                    <img src="https://picsum.photos/500/600?random=8" alt="关于我" loading="lazy">
+                </div>
+            </div>
+        </section>
+        
+        <!-- 联系方式 -->
+        <section id="contact" class="contact">
+            <div class="contact__container">
+                <div class="section__header section__header--center">
+                    <h2 class="section__title">联系我</h2>
+                    <p class="section__description">有想法？随时联系我</p>
+                </div>
+                
+                <div class="contact__content">
+                    <form class="contact__form" action="#" method="post">
+                        <div class="form__group">
+                            <label for="name" class="form__label">姓名</label>
+                            <input 
+                                type="text" 
+                                id="name" 
+                                name="name" 
+                                class="form__input" 
+                                required 
+                                placeholder="请输入您的姓名"
+                                aria-describedby="name-help"
+                            >
+                        </div>
+                        
+                        <div class="form__group">
+                            <label for="email" class="form__label">邮箱</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="form__input" 
+                                required 
+                                placeholder="请输入您的邮箱"
+                                aria-describedby="email-help"
+                            >
+                        </div>
+                        
+                        <div class="form__group">
+                            <label for="message" class="form__label">留言</label>
+                            <textarea 
+                                id="message" 
+                                name="message" 
+                                class="form__textarea" 
+                                rows="5" 
+                                required 
+                                placeholder="请输入您的留言"
+                            ></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn--primary btn--full">
+                            发送消息
+                            <span class="iconify" data-icon="ph:paper-plane-right-bold"></span>
+                        </button>
+                    </form>
+                    
+                    <div class="contact__info">
+                        <div class="contact__info-item">
+                            <span class="contact__info-icon">
+                                <span class="iconify" data-icon="ph:envelope-simple-bold"></span>
+                            </span>
+                            <div class="contact__info-text">
+                                <h4 class="contact__info-title">邮箱</h4>
+                                <p class="contact__info-detail">contact@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact__info-item">
+                            <span class="contact__info-icon">
+                                <span class="iconify" data-icon="ph:map-pin-bold"></span>
+                            </span>
+                            <div class="contact__info-text">
+                                <h4 class="contact__info-title">位置</h4>
+                                <p class="contact__info-detail">中国 · 北京</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact__social">
+                            <a href="#" class="contact__social-link" aria-label="GitHub">
+                                <span class="iconify" data-icon="ph:github-logo-bold"></span>
+                            </a>
+                            <a href="#" class="contact__social-link" aria-label="Twitter">
+                                <span class="iconify" data-icon="ph:twitter-logo-bold"></span>
+                            </a>
+                            <a href="#" class="contact__social-link" aria-label="LinkedIn">
+                                <span class="iconify" data-icon="ph:linkedin-logo-bold"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <div class="footer__logo">
+                    <span class="nav__logo-text">刀仔的博客</span>
+                </div>
+                <p class="footer__text">
+                    记录生活 · 分享技术 · 持续成长
+                </p>
+            </div>
+            
+            <div class="footer__bottom">
+                <p class="footer__copyright">
+                    © 2024 陈刀仔. 保留所有权利.
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="main.js"></script>
+</body>
+</html>
