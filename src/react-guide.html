@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React技术详解 - 刀仔的学习网站</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .article-container { max-width: 800px; margin: 0 auto; padding: 80px 20px; }
+        .article-header { margin-bottom: 40px; }
+        .article-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .article-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary); color: white; font-size: 14px; font-weight: 600; border-radius: 20px; }
+        .article-date { font-size: 14px; color: var(--color-text-tertiary); }
+        .article-title { font-family: var(--font-family-heading); font-size: 48px; font-weight: 700; line-height: 1.2; color: var(--color-text); margin-bottom: 24px; }
+        .article-excerpt { font-size: 20px; color: var(--color-text-secondary); line-height: 1.6; }
+        .article-content { font-size: 18px; line-height: 1.8; color: var(--color-text); }
+        .article-content h2 { font-family: var(--font-family-heading); font-size: 32px; font-weight: 700; margin: 48px 0 24px; color: var(--color-text); border-bottom: 2px solid var(--color-border); padding-bottom: 12px; }
+        .article-content h3 { font-size: 24px; font-weight: 600; margin: 32px 0 16px; color: var(--color-text); }
+        .article-content p { margin-bottom: 24px; }
+        .article-content ul, .article-content ol { margin: 24px 0; padding-left: 32px; }
+        .article-content li { margin-bottom: 12px; }
+        .article-content code { font-family: 'Courier New', monospace; background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px; font-size: 16px; }
+        .article-content pre { background: var(--color-bg-tertiary); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 24px 0; }
+        .article-content pre code { background: none; padding: 0; font-size: 14px; }
+        .article-content blockquote { border-left: 4px solid var(--color-primary); padding-left: 20px; margin: 24px 0; color: var(--color-text-secondary); font-style: italic; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-secondary); text-decoration: none; font-weight: 500; transition: color 0.3s ease; margin-bottom: 32px; }
+        .back-link:hover { color: var(--color-primary); }
+        @media (max-width: 768px) {
+            .article-container { padding: 40px 16px; }
+            .article-title { font-size: 32px; }
+            .article-content { font-size: 16px; }
+            .article-content h2 { font-size: 24px; }
+            .article-content h3 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <a href="../index.html" class="nav__logo"><span class="nav__logo-text">刀仔的学习网站</span></a>
+                <ul class="nav__menu">
+                    <li class="nav__item"><a href="../index.html#home" class="nav__link">首页</a></li>
+                    <li class="nav__item"><a href="../index.html#articles" class="nav__link nav__link--active">文章</a></li>
+                    <li class="nav__item"><a href="../index.html#about" class="nav__link">关于</a></li>
+                    <li class="nav__item"><a href="../index.html#contact" class="nav__link">联系</a></li>
+                </ul>
+                <div class="nav__actions">
+                    <button class="theme-toggle" aria-label="切换主题" data-theme-toggle>
+                        <span class="theme-toggle__icon theme-toggle__icon--sun"><span class="iconify" data-icon="ph:sun-bold"></span></span>
+                        <span class="theme-toggle__icon theme-toggle__icon--moon"><span class="iconify" data-icon="ph:moon-bold"></span></span>
+                    </button>
+                    <button class="nav__toggle" aria-label="切换菜单" data-nav-toggle><span class="iconify" data-icon="ph:list-bold"></span></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="article-container">
+        <a href="../index.html#articles" class="back-link"><span class="iconify" data-icon="ph:arrow-left-bold"></span>返回文章列表</a>
+        <article>
+            <header class="article-header">
+                <div class="article-meta"><span class="article-tag">前端框架</span><time class="article-date" datetime="2026-01-18">2026年1月18日</time></div>
+                <h1 class="article-title">React技术详解</h1>
+                <p class="article-excerpt">React是Facebook开发的用户界面库，本文将深入解析React的核心概念、Hooks、组件化和最佳实践。</p>
+            </header>
+            <div class="article-content">
+                <h2>React概述</h2>
+                <p>React是一个用于构建用户界面的JavaScript库，由Facebook开发并开源。React采用组件化思想，使得UI开发更加模块化和可重用。React的核心是虚拟DOM和单向数据流，通过高效的状态管理和渲染机制，提供了流畅的用户体验。</p>
+                
+                <h2>核心概念</h2>
+                
+                <h3>1. JSX</h3>
+                <p>JSX是一种JavaScript的语法扩展，允许我们在JavaScript中编写类似HTML的代码：</p>
+                <pre><code>import React from 'react';
+
+function App() {
+    const name = '张三';
+    const age = 25;
+    
+    return (
+        &lt;div className="container"&gt;
+            &lt;h1&gt;你好，{name}&lt;/h1&gt;
+            &lt;p&gt;年龄：{age}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}
+
+export default App;</code></pre>
+                
+                <h3>2. 组件</h3>
+                <p>React应用由组件构成，组件可以是函数组件或类组件：</p>
+                <pre><code>// 函数组件
+function Welcome(props) {
+    return &lt;h1&gt;欢迎，{props.name}&lt;/h1&gt;;
+}
+
+// 类组件
+class Welcome extends React.Component {
+    render() {
+        return &lt;h1&gt;欢迎，{this.props.name}&lt;/h1&gt;;
+    }
+}
+
+// 使用
+&lt;Welcome name="张三" /&gt;</code></pre>
+                
+                <h3>3. Props</h3>
+                <p>Props是组件的属性，用于从父组件向子组件传递数据：</p>
+                <pre><code>function UserCard({ name, age, avatar }) {
+    return (
+        &lt;div className="user-card"&gt;
+            &lt;img src={avatar} alt={name} /&gt;
+            &lt;h2&gt;{name}&lt;/h2&gt;
+            &lt;p&gt;年龄：{age}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}
+
+// 使用
+&lt;UserCard 
+    name="张三" 
+    age={25} 
+    avatar="avatar.jpg" 
+/&gt;</code></pre>
+                
+                <h3>4. State</h3>
+                <p>State是组件的内部状态，用于存储组件的数据：</p>
+                <pre><code>import { useState } from 'react';
+
+function Counter() {
+    const [count, setCount] = useState(0);
+    
+    return (
+        &lt;div&gt;
+            &lt;p&gt;计数：{count}&lt;/p&gt;
+            &lt;button onClick={() => setCount(count + 1)}&gt;增加&lt;/button&gt;
+            &lt;button onClick={() => setCount(count - 1)}&gt;减少&lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                
+                <h2>React Hooks</h2>
+                
+                <h3>1. useState</h3>
+                <pre><code>import { useState } from 'react';
+
+function Form() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log({ name, email });
+    };
+    
+    return (
+        &lt;form onSubmit={handleSubmit}&gt;
+            &lt;input 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="姓名"
+            /&gt;
+            &lt;input 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="邮箱"
+            /&gt;
+            &lt;button type="submit"&gt;提交&lt;/button&gt;
+        &lt;/form&gt;
+    );
+}</code></pre>
+                
+                <h3>2. useEffect</h3>
+                <pre><code>import { useState, useEffect } from 'react';
+
+function UserProfile({ userId }) {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                const data = await response.json();
+                setUser(data);
+            } catch (error) {
+                console.error('获取用户失败:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        fetchUser();
+    }, [userId]);
+    
+    if (loading) return &lt;p&gt;加载中...&lt;/p&gt;;
+    if (!user) return &lt;p&gt;用户不存在&lt;/p&gt;;
+    
+    return (
+        &lt;div&gt;
+            &lt;h1&gt;{user.name}&lt;/h1&gt;
+            &lt;p&gt;{user.email}&lt;/p&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                
+                <h3>3. useContext</h3>
+                <pre><code>import { createContext, useContext } from 'react';
+
+const ThemeContext = createContext('light');
+
+function App() {
+    return (
+        &lt;ThemeContext.Provider value="dark"&gt;
+            &lt;Toolbar /&gt;
+        &lt;/ThemeContext.Provider&gt;
+    );
+}
+
+function Toolbar() {
+    const theme = useContext(ThemeContext);
+    return &lt;div className={theme}&gt;当前主题：{theme}&lt;/div&gt;;
+}</code></pre>
+                
+                <h3>4. useReducer</h3>
+                <pre><code>import { useReducer } from 'react';
+
+function reducer(state, action) {
+    switch (action.type) {
+        case 'increment':
+            return { count: state.count + 1 };
+        case 'decrement':
+            return { count: state.count - 1 };
+        case 'reset':
+            return { count: 0 };
+        default:
+            throw new Error();
+    }
+}
+
+function Counter() {
+    const [state, dispatch] = useReducer(reducer, { count: 0 });
+    
+    return (
+        &lt;div&gt;
+            &lt;p&gt;计数：{state.count}&lt;/p&gt;
+            &lt;button onClick={() => dispatch({ type: 'increment' })}&gt;增加&lt;/button&gt;
+            &lt;button onClick={() => dispatch({ type: 'decrement' })}&gt;减少&lt;/button&gt;
+            &lt;button onClick={() => dispatch({ type: 'reset' })}&gt;重置&lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                
+                <h3>5. useMemo和useCallback</h3>
+                <pre><code>import { useState, useMemo, useCallback } from 'react';
+
+function ExpensiveComponent({ data }) {
+    const expensiveValue = useMemo(() => {
+        return data.reduce((acc, item) => acc + item.value, 0);
+    }, [data]);
+    
+    const handleClick = useCallback(() => {
+        console.log('点击处理', expensiveValue);
+    }, [expensiveValue]);
+    
+    return (
+        &lt;div&gt;
+            &lt;p&gt;计算结果：{expensiveValue}&lt;/p&gt;
+            &lt;button onClick={handleClick}&gt;点击&lt;/button&gt;
+        &lt;/div&gt;
+    );
+}</code></pre>
+                
+                <h2>最佳实践</h2>
+                
+                <h3>1. 组件设计</h3>
+                <ul>
+                    <li>保持组件单一职责</li>
+                    <li>使用函数组件代替类组件</li>
+                    <li>合理拆分组件，提高复用性</li>
+                    <li>使用PropTypes进行类型检查</li>
+                </ul>
+                
+                <h3>2. 性能优化</h3>
+                <ul>
+                    <li>使用React.memo避免不必要的渲染</li>
+                    <li>使用useMemo和useCallback优化计算</li>
+                    <li>使用虚拟滚动处理长列表</li>
+                    <li>使用代码分割和懒加载</li>
+                </ul>
+                
+                <h3>3. 状态管理</h3>
+                <ul>
+                    <li>合理使用useState和useReducer</li>
+                    <li>对于复杂状态，使用Context API或Redux</li>
+                    <li>避免状态提升，尽量保持局部状态</li>
+                    <li>使用服务器状态管理库（如React Query）</li>
+                </ul>
+                
+                <h2>总结</h2>
+                <p>React是现代前端开发的核心框架之一，掌握React的核心概念和Hooks对于前端开发者至关重要。通过合理使用React的特性和最佳实践，我们可以构建出高效、可维护的用户界面。</p>
+                <p>在实际开发中，要注重组件的复用性、性能优化和代码可维护性，为用户提供更好的体验。</p>
+            </div>
+        </article>
+    </main>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <div class="footer__logo"><span class="nav__logo-text">刀仔的学习网站</span></div>
+                <p class="footer__text">记录生活 · 分享技术 · 持续成长</p>
+            </div>
+            <div class="footer__bottom"><p class="footer__copyright">© 2024 陈刀仔. 保留所有权利.</p></div>
+        </div>
+    </footer>
+    <script src="main.js"></script>
+</body>
+</html>

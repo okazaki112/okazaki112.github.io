@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深入理解 JavaScript 闭包 - 刀仔的学习网站</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .article-container { max-width: 800px; margin: 0 auto; padding: 80px 20px; }
+        .article-header { margin-bottom: 40px; }
+        .article-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .article-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary); color: white; font-size: 14px; font-weight: 600; border-radius: 20px; }
+        .article-date { font-size: 14px; color: var(--color-text-tertiary); }
+        .article-title { font-family: var(--font-family-heading); font-size: 48px; font-weight: 700; line-height: 1.2; color: var(--color-text); margin-bottom: 24px; }
+        .article-excerpt { font-size: 20px; color: var(--color-text-secondary); line-height: 1.6; }
+        .article-content { font-size: 18px; line-height: 1.8; color: var(--color-text); }
+        .article-content h2 { font-family: var(--font-family-heading); font-size: 32px; font-weight: 700; margin: 48px 0 24px; color: var(--color-text); border-bottom: 2px solid var(--color-border); padding-bottom: 12px; }
+        .article-content h3 { font-size: 24px; font-weight: 600; margin: 32px 0 16px; color: var(--color-text); }
+        .article-content p { margin-bottom: 24px; }
+        .article-content ul, .article-content ol { margin: 24px 0; padding-left: 32px; }
+        .article-content li { margin-bottom: 12px; }
+        .article-content code { font-family: 'Courier New', monospace; background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px; font-size: 16px; }
+        .article-content pre { background: var(--color-bg-tertiary); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 24px 0; }
+        .article-content pre code { background: none; padding: 0; font-size: 14px; }
+        .article-content blockquote { border-left: 4px solid var(--color-primary); padding-left: 20px; margin: 24px 0; color: var(--color-text-secondary); font-style: italic; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-secondary); text-decoration: none; font-weight: 500; transition: color 0.3s ease; margin-bottom: 32px; }
+        .back-link:hover { color: var(--color-primary); }
+        @media (max-width: 768px) {
+            .article-container { padding: 40px 16px; }
+            .article-title { font-size: 32px; }
+            .article-content { font-size: 16px; }
+            .article-content h2 { font-size: 24px; }
+            .article-content h3 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <a href="../index.html" class="nav__logo"><span class="nav__logo-text">刀仔的学习网站</span></a>
+                <ul class="nav__menu">
+                    <li class="nav__item"><a href="../index.html#home" class="nav__link">首页</a>
+                    <li class="nav__item"><a href="../index.html#articles" class="nav__link nav__link--active">文章</a></li>
+                    <li class="nav__item"><a href="../index.html#about" class="nav__link">关于</a></li>
+                    <li class="nav__item"><a href="../index.html#contact" class="nav__link">联系</a></li>
+                </ul>
+                <div class="nav__actions">
+                    <button class="theme-toggle" aria-label="切换主题" data-theme-toggle>
+                        <span class="theme-toggle__icon theme-toggle__icon--sun"><span class="iconify" data-icon="ph:sun-bold"></span></span>
+                        <span class="theme-toggle__icon theme-toggle__icon--moon"><span class="iconify" data-icon="ph:moon-bold"></span></span>
+                    </button>
+                    <button class="nav__toggle" aria-label="切换菜单" data-nav-toggle><span class="iconify" data-icon="ph:list-bold"></span></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="article-container">
+        <a href="../index.html#articles" class="back-link"><span class="iconify" data-icon="ph:arrow-left-bold"></span>返回文章列表</a>
+        <article>
+            <header class="article-header">
+                <div class="article-meta"><span class="article-tag">前端开发</span><time class="article-date" datetime="2026-01-01">2026年1月1日</time></div>
+                <h1 class="article-title">深入理解 JavaScript 闭包</h1>
+                <p class="article-excerpt">闭包是JavaScript中最强大的特性之一。本文将从基础概念讲起，深入探讨闭包的工作原理和实际应用场景。</p>
+            </header>
+            <div class="article-content">
+                <h2>什么是闭包？</h2>
+                <p>闭包是JavaScript中一个重要且强大的概念。简单来说，闭包是指函数能够记住并访问其定义时的词法作用域，即使函数在定义的作用域之外执行。</p>
+                <pre><code>function createCounter() {
+    let count = 0;
+    return function() {
+        count++;
+        return count;
+    };
+}
+
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2
+console.log(counter()); // 3</code></pre>
+                <p>在这个例子中，`createCounter` 返回的匿名函数形成了一个闭包，它可以访问外部函数的 `count` 变量。</p>
+                
+                <h2>闭包的工作原理</h2>
+                <p>要理解闭包，需要了解JavaScript的作用域链：</p>
+                <ul>
+                    <li>函数在定义时会创建一个作用域链</li>
+                    <li>作用域链包含函数自身的作用域和所有外部作用域</li>
+                    <li>当函数执行时，会沿着作用域链查找变量</li>
+                </ul>
+                
+                <h2>闭包的实际应用</h2>
+                <h3>1. 数据私有化</h3>
+                <p>使用闭包可以创建私有变量，实现模块化：</p>
+                <pre><code>function createPerson(name) {
+    let age = 0;
+    return {
+        getName: () => name,
+        getAge: () => age,
+        setAge: (newAge) => { age = newAge; }
+    };
+}
+
+const person = createPerson('张三');
+console.log(person.getName()); // 张三
+console.log(person.getAge()); // 0
+person.setAge(25);
+console.log(person.getAge()); // 25</code></pre>
+                
+                <h3>2. 函数工厂</h3>
+                <p>闭包可以用来创建具有特定配置的函数：</p>
+                <pre><code>function createMultiplier(multiplier) {
+    return function(x) {
+        return x * multiplier;
+    };
+}
+
+const double = createMultiplier(2);
+const triple = createMultiplier(3);
+
+console.log(double(5)); // 10
+console.log(triple(5)); // 15</code></pre>
+                
+                <h3>3. 事件处理</h3>
+                <p>在事件处理中，闭包常用于保存状态：</p>
+                <pre><code>const buttons = document.querySelectorAll('button');
+buttons.forEach((button, index) => {
+    button.addEventListener('click', function() {
+        console.log('按钮 ' + index + ' 被点击');
+    });
+});</code></pre>
+                
+                <h2>闭包的注意事项</h2>
+                <h3>1. 内存泄漏</h3>
+                <p>闭包会持有对外部变量的引用，如果不正确使用可能导致内存泄漏：</p>
+                <pre><code>// 不好的做法
+function createElements() {
+    const elements = [];
+    for (let i = 0; i < 1000; i++) {
+        const element = document.createElement('div');
+        element.onclick = function() {
+            console.log(elements[i]); // 持有对整个数组的引用
+        };
+        elements.push(element);
+    }
+    return elements;
+}</code></pre>
+                
+                <h3>2. 性能影响</h3>
+                <p>闭包比普通函数消耗更多内存，因为它需要保持作用域链。在性能敏感的场景中需要谨慎使用。</p>
+                
+                <h2>总结</h2>
+                <p>闭包是JavaScript中一个非常强大的特性，它让我们能够：</p>
+                <ul>
+                    <li>实现数据私有化和封装</li>
+                    <li>创建函数工厂和配置函数</li>
+                    <li>在异步操作中保持状态</li>
+                    <li>实现优雅的设计模式</li>
+                </ul>
+                <p>理解闭包对于掌握JavaScript至关重要，它是编写高质量、可维护代码的基础。</p>
+            </div>
+        </article>
+    </main>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <div class="footer__logo"><span class="nav__logo-text">刀仔的学习网站</span></div>
+                <p class="footer__text">记录生活 · 分享技术 · 持续成长</p>
+            </div>
+            <div class="footer__bottom"><p class="footer__copyright">© 2024 陈刀仔. 保留所有权利.</p></div>
+        </div>
+    </footer>
+    <script src="main.js"></script>
+</body>
+</html>

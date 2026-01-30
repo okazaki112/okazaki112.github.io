@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeScript技术详解 - 刀仔的学习网站</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .article-container { max-width: 800px; margin: 0 auto; padding: 80px 20px; }
+        .article-header { margin-bottom: 40px; }
+        .article-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .article-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary); color: white; font-size: 14px; font-weight: 600; border-radius: 20px; }
+        .article-date { font-size: 14px; color: var(--color-text-tertiary); }
+        .article-title { font-family: var(--font-family-heading); font-size: 48px; font-weight: 700; line-height: 1.2; color: var(--color-text); margin-bottom: 24px; }
+        .article-excerpt { font-size: 20px; color: var(--color-text-secondary); line-height: 1.6; }
+        .article-content { font-size: 18px; line-height: 1.8; color: var(--color-text); }
+        .article-content h2 { font-family: var(--font-family-heading); font-size: 32px; font-weight: 700; margin: 48px 0 24px; color: var(--color-text); border-bottom: 2px solid var(--color-border); padding-bottom: 12px; }
+        .article-content h3 { font-size: 24px; font-weight: 600; margin: 32px 0 16px; color: var(--color-text); }
+        .article-content p { margin-bottom: 24px; }
+        .article-content ul, .article-content ol { margin: 24px 0; padding-left: 32px; }
+        .article-content li { margin-bottom: 12px; }
+        .article-content code { font-family: 'Courier New', monospace; background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px; font-size: 16px; }
+        .article-content pre { background: var(--color-bg-tertiary); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 24px 0; }
+        .article-content pre code { background: none; padding: 0; font-size: 14px; }
+        .article-content blockquote { border-left: 4px solid var(--color-primary); padding-left: 20px; margin: 24px 0; color: var(--color-text-secondary); font-style: italic; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-secondary); text-decoration: none; font-weight: 500; transition: color 0.3s ease; margin-bottom: 32px; }
+        .back-link:hover { color: var(--color-primary); }
+        @media (max-width: 768px) {
+            .article-container { padding: 40px 16px; }
+            .article-title { font-size: 32px; }
+            .article-content { font-size: 16px; }
+            .article-content h2 { font-size: 24px; }
+            .article-content h3 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <a href="../index.html" class="nav__logo"><span class="nav__logo-text">刀仔的学习网站</span></a>
+                <ul class="nav__menu">
+                    <li class="nav__item"><a href="../index.html#home" class="nav__link">首页</a></li>
+                    <li class="nav__item"><a href="../index.html#articles" class="nav__link nav__link--active">文章</a></li>
+                    <li class="nav__item"><a href="../index.html#about" class="nav__link">关于</a></li>
+                    <li class="nav__item"><a href="../index.html#contact" class="nav__link">联系</a></li>
+                </ul>
+                <div class="nav__actions">
+                    <button class="theme-toggle" aria-label="切换主题" data-theme-toggle>
+                        <span class="theme-toggle__icon theme-toggle__icon--sun"><span class="iconify" data-icon="ph:sun-bold"></span></span>
+                        <span class="theme-toggle__icon theme-toggle__icon--moon"><span class="iconify" data-icon="ph:moon-bold"></span></span>
+                    </button>
+                    <button class="nav__toggle" aria-label="切换菜单" data-nav-toggle><span class="iconify" data-icon="ph:list-bold"></span></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="article-container">
+        <a href="../index.html#articles" class="back-link"><span class="iconify" data-icon="ph:arrow-left-bold"></span>返回文章列表</a>
+        <article>
+            <header class="article-header">
+                <div class="article-meta"><span class="article-tag">编程语言</span><time class="article-date" datetime="2026-01-25">2026年1月25日</time></div>
+                <h1 class="article-title">TypeScript技术详解</h1>
+                <p class="article-excerpt">TypeScript是JavaScript的超集，添加了类型系统，本文将深入解析TypeScript的核心特性、类型系统和最佳实践。</p>
+            </header>
+            <div class="article-content">
+                <h2>TypeScript概述</h2>
+                <p>TypeScript是由Microsoft开发的JavaScript超集，添加了静态类型系统。TypeScript代码会被编译成JavaScript，可以在任何浏览器或Node.js环境中运行。TypeScript的类型系统可以帮助开发者在编译时发现错误，提高代码质量和开发效率。</p>
+                
+                <h2>核心特性</h2>
+                <h3>1. 基础类型</h3>
+                <pre><code>let name: string = '张三';
+let age: number = 25;
+let isActive: boolean = true;
+let data: any = {}; // 任意类型
+let value: unknown = {}; // 未知类型</code></pre>
+                
+                <h3>2. 接口</h3>
+                <pre><code>interface User {
+    id: number;
+    name: string;
+    email?: string; // 可选属性
+    readonly createdAt: Date; // 只读属性
+}
+
+const user: User = {
+    id: 1,
+    name: '张三',
+    createdAt: new Date()
+};</code></pre>
+                
+                <h3>3. 类</h3>
+                <pre><code>class Person {
+    private name: string;
+    protected age: number;
+    
+    constructor(name: string, age: number) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    public greet(): string {
+        return `你好，我是${this.name}`;
+    }
+}</code></pre>
+                
+                <h3>4. 泛型</h3>
+                <pre><code>function identity&lt;T&gt;(arg: T): T {
+    return arg;
+}
+
+const result = identity&lt;string&gt;('hello');
+
+interface Response&lt;T&gt; {
+    data: T;
+    status: number;
+    message: string;
+}
+
+async function fetchUser(): Promise&lt;Response&lt;User&gt;&gt; {
+    const response = await fetch('/api/user');
+    const data = await response.json();
+    return {
+        data,
+        status: response.status,
+        message: 'Success'
+    };
+}</code></pre>
+                
+                <h2>最佳实践</h2>
+                <ul>
+                    <li>使用接口定义数据结构</li>
+                    <li>使用泛型提高代码复用性</li>
+                    <li>使用联合类型和类型守卫</li>
+                    <li>避免使用any，使用unknown代替</li>
+                    <li>使用strict模式进行严格类型检查</li>
+                </ul>
+                
+                <h2>总结</h2>
+                <p>TypeScript是现代JavaScript开发的重要工具，掌握TypeScript的类型系统和最佳实践对于开发者至关重要。通过合理使用TypeScript的特性和类型系统，我们可以编写出更安全、更易维护的代码。</p>
+            </div>
+        </article>
+    </main>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <div class="footer__logo"><span class="nav__logo-text">刀仔的博客</span></div>
+                <p class="footer__text">记录生活 · 分享技术 · 持续成长</p>
+            </div>
+            <div class="footer__bottom"><p class="footer__copyright">© 2024 陈刀仔. 保留所有权利.</p></div>
+        </div>
+    </footer>
+    <script src="main.js"></script>
+</body>
+</html>

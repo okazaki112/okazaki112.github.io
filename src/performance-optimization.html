@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端性能优化实战指南 - 刀仔的学习网站</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .article-container { max-width: 800px; margin: 0 auto; padding: 80px 20px; }
+        .article-header { margin-bottom: 40px; }
+        .article-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .article-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary); color: white; font-size: 14px; font-weight: 600; border-radius: 20px; }
+        .article-date { font-size: 14px; color: var(--color-text-tertiary); }
+        .article-title { font-family: var(--font-family-heading); font-size: 48px; font-weight: 700; line-height: 1.2; color: var(--color-text); margin-bottom: 24px; }
+        .article-excerpt { font-size: 20px; color: var(--color-text-secondary); line-height: 1.6; }
+        .article-content { font-size: 18px; line-height: 1.8; color: var(--color-text); }
+        .article-content h2 { font-family: var(--font-family-heading); font-size: 32px; font-weight: 700; margin: 48px 0 24px; color: var(--color-text); border-bottom: 2px solid var(--color-border); padding-bottom: 12px; }
+        .article-content h3 { font-size: 24px; font-weight: 600; margin: 32px 0 16px; color: var(--color-text); }
+        .article-content p { margin-bottom: 24px; }
+        .article-content ul, .article-content ol { margin: 24px 0; padding-left: 32px; }
+        .article-content li { margin-bottom: 12px; }
+        .article-content code { font-family: 'Courier New', monospace; background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px; font-size: 16px; }
+        .article-content pre { background: var(--color-bg-tertiary); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 24px 0; }
+        .article-content pre code { background: none; padding: 0; font-size: 14px; }
+        .article-content blockquote { border-left: 4px solid var(--color-primary); padding-left: 20px; margin: 24px 0; color: var(--color-text-secondary); font-style: italic; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-secondary); text-decoration: none; font-weight: 500; transition: color 0.3s ease; margin-bottom: 32px; }
+        .back-link:hover { color: var(--color-primary); }
+        @media (max-width: 768px) {
+            .article-container { padding: 40px 16px; }
+            .article-title { font-size: 32px; }
+            .article-content { font-size: 16px; }
+            .article-content h2 { font-size: 24px; }
+            .article-content h3 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <a href="../index.html" class="nav__logo"><span class="nav__logo-text">刀仔的学习网站</span></a>
+                <ul class="nav__menu">
+                    <li class="nav__item"><a href="../index.html#home" class="nav__link">首页</a></li>
+                    <li class="nav__item"><a href="../index.html#articles" class="nav__link nav__link--active">文章</a></li>
+                    <li class="nav__item"><a href="../index.html#about" class="nav__link">关于</a></li>
+                    <li class="nav__item"><a href="../index.html#contact" class="nav__link">联系</a></li>
+                </ul>
+                <div class="nav__actions">
+                    <button class="theme-toggle" aria-label="切换主题" data-theme-toggle>
+                        <span class="theme-toggle__icon theme-toggle__icon--sun"><span class="iconify" data-icon="ph:sun-bold"></span></span>
+                        <span class="theme-toggle__icon theme-toggle__icon--moon"><span class="iconify" data-icon="ph:moon-bold"></span></span>
+                    </button>
+                    <button class="nav__toggle" aria-label="切换菜单" data-nav-toggle><span class="iconify" data-icon="ph:list-bold"></span></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="article-container">
+        <a href="../index.html#articles" class="back-link"><span class="iconify" data-icon="ph:arrow-left-bold"></span>返回文章列表</a>
+        <article>
+            <header class="article-header">
+                <div class="article-meta"><span class="article-tag">性能优化</span><time class="article-date" datetime="2026-01-03">2026年1月3日</time></div>
+                <h1 class="article-title">前端性能优化实战指南</h1>
+                <p class="article-excerpt">从加载速度到渲染性能，全方位解析前端性能优化的技巧和最佳实践，让你的网页飞起来。</p>
+            </header>
+            <div class="article-content">
+                <h2>为什么要关注性能优化？</h2>
+                <p>研究表明，页面加载时间每增加1秒，用户转化率就会下降7%。53%的移动用户会在3秒内放弃加载缓慢的网站。性能优化不仅影响用户体验，还直接影响业务指标。</p>
+                
+                <h2>一、资源加载优化</h2>
+                
+                <h3>1. 图片优化</h3>
+                <p>图片通常占据页面的大部分带宽：</p>
+                <ul>
+                    <li>使用合适的图片格式（WebP、AVIF）</li>
+                    <li>响应式图片（srcset、sizes）</li>
+                    <li>懒加载（loading="lazy"）</li>
+                    <li>压缩图片质量</li>
+                </ul>
+                <pre><code><!-- 响应式图片 -->
+<img src="small.jpg" 
+     srcset="small.jpg 480w, medium.jpg 768w, large.jpg 1200w"
+     sizes="(max-width: 768px) 100vw, 50vw"
+     alt="描述"
+     loading="lazy"></code></pre>
+                
+                <h3>2. 代码拆分和懒加载</h3>
+                <p>使用动态导入实现代码拆分：</p>
+                <pre><code>// 动态导入组件
+const LazyComponent = lazy(() => import('./LazyComponent'));
+
+function App() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <LazyComponent />
+        </Suspense>
+    );
+}</code></pre>
+                
+                <h3>3. CDN加速</h3>
+                <p>使用CDN可以显著提升资源加载速度：</p>
+                <ul>
+                    <li>将静态资源托管到CDN</li>
+                    <li>选择离用户最近的节点</li>
+                    <li>利用CDN的缓存机制</li>
+                </ul>
+                
+                <h2>二、渲染性能优化</h2>
+                
+                <h3>1. 减少重排和重绘</h3>
+                <p>优化DOM操作以减少重排：</p>
+                <ul>
+                    <li>批量更新DOM</li>
+                    <li>使用文档片段（DocumentFragment）</li>
+                    <li>避免频繁读取布局属性</li>
+                    <li>使用transform和opacity代替top和width</li>
+                </ul>
+                <pre><code>// 不好的做法
+element.style.width = '100px';
+console.log(element.offsetWidth); // 触发重排
+element.style.height = '100px';
+
+// 好的做法
+const style = element.style;
+style.width = '100px';
+style.height = '100px';
+const offsetWidth = element.offsetWidth;</code></pre>
+                
+                <h3>2. 虚拟滚动</h3>
+                <p>对于长列表，使用虚拟滚动只渲染可见部分：</p>
+                <pre><code>function VirtualList({ items, itemHeight, containerHeight }) {
+    const [scrollTop, setScrollTop] = useState(0);
+    const visibleCount = Math.ceil(containerHeight / itemHeight);
+    const startIndex = Math.floor(scrollTop / itemHeight);
+    const endIndex = startIndex + visibleCount;
+    const visibleItems = items.slice(startIndex, endIndex);
+    
+    return (
+        <div style={{ height: containerHeight, overflow: 'auto' }} onScroll={e => setScrollTop(e.target.scrollTop)}>
+            <div style={{ height: items.length * itemHeight, position: 'relative' }}>
+                {visibleItems.map((item, index) => (
+                    <div key={startIndex + index} style={{ 
+                        position: 'absolute', 
+                        top: (startIndex + index) * itemHeight,
+                        height: itemHeight 
+                    }}>
+                        {item}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}</code></pre>
+                
+                <h3>3. 防抖和节流</h3>
+                <p>优化高频事件处理：</p>
+                <pre><code>// 防抖
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+// 节流
+function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// 使用
+window.addEventListener('resize', debounce(handleResize, 300));
+window.addEventListener('scroll', throttle(handleScroll, 100));</code></pre>
+                
+                <h2>三、缓存策略</h2>
+                
+                <h3>1. 浏览器缓存</h3>
+                <p>合理设置HTTP缓存头：</p>
+                <pre><code>// Service Worker 缓存
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request).then(response => {
+            return response || fetch(event.request).then(response => {
+                return caches.open('v1').then(cache => {
+                    cache.put(event.request, response.clone());
+                    return response;
+                });
+            });
+        })
+    );
+});</code></pre>
+                
+                <h3>2. 本地存储</h3>
+                <p>使用localStorage和IndexedDB存储数据：</p>
+                <pre><code>// LocalStorage
+localStorage.setItem('user', JSON.stringify(user));
+const cachedUser = JSON.parse(localStorage.getItem('user'));
+
+// IndexedDB
+const request = indexedDB.open('myDatabase', 1);
+request.onsuccess = (event) => {
+    const db = event.target.result;
+    const transaction = db.transaction(['users'], 'readwrite');
+    const store = transaction.objectStore('users');
+    store.add({ id: 1, name: '张三' });
+};</code></pre>
+                
+                <h2>四、性能监控</h2>
+                
+                <h3>1. 使用Performance API</h3>
+                <pre><code>// 监控页面加载性能
+window.addEventListener('load', () => {
+    const perfData = performance.getEntriesByType('navigation')[0];
+    console.log('页面加载时间:', perfData.loadEventEnd - perfData.fetchStart);
+    console.log('DOM解析时间:', perfData.domComplete - perfData.domInteractive);
+    console.log('资源加载时间:', perfData.loadEventEnd - perfInfo.domContentLoadedEventEnd);
+});</code></pre>
+                
+                <h3>2. 使用Lighthouse</h3>
+                <p>Lighthouse是Google提供的性能分析工具，可以全面评估页面性能。</p>
+                
+                <h2>五、最佳实践总结</h2>
+                <ul>
+                    <li>优先优化关键渲染路径</li>
+                    <li>使用现代Web API（Intersection Observer、Resize Observer）</li>
+                    <li>实施渐进式加载策略</li>
+                    <li>定期进行性能审计</li>
+                    <li>监控真实用户性能（RUM）</li>
+                </ul>
+                
+                <h2>结语</h2>
+                <p>性能优化是一个持续的过程，需要结合实际情况灵活应用各种技术。记住，最好的优化是不需要优化，但当我们需要优化时，要有系统的策略和方法论。</p>
+            </div>
+        </article>
+    </main>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <div class="footer__logo"><span class="nav__logo-text">刀仔的学习网站</span></div>
+                <p class="footer__text">记录生活 · 分享技术 · 持续成长</p>
+            </div>
+            <div class="footer__bottom"><p class="footer__copyright">© 2024 陈刀仔. 保留所有权利.</p></div>
+        </div>
+    </footer>
+    <script src="main.js"></script>
+</body>
+</html>

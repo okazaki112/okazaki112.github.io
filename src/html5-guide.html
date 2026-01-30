@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5技术详解 - 刀仔的学习网站</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .article-container { max-width: 800px; margin: 0 auto; padding: 80px 20px; }
+        .article-header { margin-bottom: 40px; }
+        .article-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .article-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary); color: white; font-size: 14px; font-weight: 600; border-radius: 20px; }
+        .article-date { font-size: 14px; color: var(--color-text-tertiary); }
+        .article-title { font-family: var(--font-family-heading); font-size: 48px; font-weight: 700; line-height: 1.2; color: var(--color-text); margin-bottom: 24px; }
+        .article-excerpt { font-size: 20px; color: var(--color-text-secondary); line-height: 1.6; }
+        .article-content { font-size: 18px; line-height: 1.8; color: var(--color-text); }
+        .article-content h2 { font-family: var(--font-family-heading); font-size: 32px; font-weight: 700; margin: 48px 0 24px; color: var(--color-text); border-bottom: 2px solid var(--color-border); padding-bottom: 12px; }
+        .article-content h3 { font-size: 24px; font-weight: 600; margin: 32px 0 16px; color: var(--color-text); }
+        .article-content p { margin-bottom: 24px; }
+        .article-content ul, .article-content ol { margin: 24px 0; padding-left: 32px; }
+        .article-content li { margin-bottom: 12px; }
+        .article-content code { font-family: 'Courier New', monospace; background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px; font-size: 16px; }
+        .article-content pre { background: var(--color-bg-tertiary); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 24px 0; }
+        .article-content pre code { background: none; padding: 0; font-size: 14px; }
+        .article-content blockquote { border-left: 4px solid var(--color-primary); padding-left: 20px; margin: 24px 0; color: var(--color-text-secondary); font-style: italic; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-secondary); text-decoration: none; font-weight: 500; transition: color 0.3s ease; margin-bottom: 32px; }
+        .back-link:hover { color: var(--color-primary); }
+        @media (max-width: 768px) {
+            .article-container { padding: 40px 16px; }
+            .article-title { font-size: 32px; }
+            .article-content { font-size: 16px; }
+            .article-content h2 { font-size: 24px; }
+            .article-content h3 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <a href="../index.html" class="nav__logo"><span class="nav__logo-text">刀仔的学习网站</span></a>
+                <ul class="nav__menu">
+                    <li class="nav__item"><a href="../index.html#home" class="nav__link">首页</a></li>
+                    <li class="nav__item"><a href="../index.html#articles" class="nav__link nav__link--active">文章</a></li>
+                    <li class="nav__item"><a href="../index.html#about" class="nav__link">关于</a></li>
+                    <li class="nav__item"><a href="../index.html#contact" class="nav__link">联系</a></li>
+                </ul>
+                <div class="nav__actions">
+                    <button class="theme-toggle" aria-label="切换主题" data-theme-toggle>
+                        <span class="theme-toggle__icon theme-toggle__icon--sun"><span class="iconify" data-icon="ph:sun-bold"></span></span>
+                        <span class="theme-toggle__icon theme-toggle__icon--moon"><span class="iconify" data-icon="ph:moon-bold"></span></span>
+                    </button>
+                    <button class="nav__toggle" aria-label="切换菜单" data-nav-toggle><span class="iconify" data-icon="ph:list-bold"></span></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="article-container">
+        <a href="../index.html#articles" class="back-link"><span class="iconify" data-icon="ph:arrow-left-bold"></span>返回文章列表</a>
+        <article>
+            <header class="article-header">
+                <div class="article-meta"><span class="article-tag">前端技术</span><time class="article-date" datetime="2026-01-10">2026年1月10日</time></div>
+                <h1 class="article-title">HTML5技术详解</h1>
+                <p class="article-excerpt">HTML5是Web开发的基础，本文将深入解析HTML5的核心特性、新标签、API以及最佳实践。</p>
+            </header>
+            <div class="article-content">
+                <h2>什么是HTML5？</h2>
+                <p>HTML5是HTML的最新版本，于2014年成为W3C推荐标准。它不仅仅是HTML的更新，更是对Web应用的一次全面升级，引入了许多新的语义化标签、多媒体支持和API，使得Web开发更加简单和强大。</p>
+                
+                <h2>HTML5的核心特性</h2>
+                
+                <h3>1. 语义化标签</h3>
+                <p>HTML5引入了许多新的语义化标签，使得页面结构更加清晰，对搜索引擎和辅助技术更加友好：</p>
+                <pre><code>&lt;header&gt;&lt;/header&gt;  <!-- 页面头部 -->
+&lt;nav&gt;&lt;/nav&gt;        <!-- 导航菜单 -->
+&lt;main&gt;&lt;/main&gt;        <!-- 主要内容 -->
+&lt;article&gt;&lt;/article&gt;  <!-- 文章内容 -->
+&lt;section&gt;&lt;/section&gt;  <!-- 章节 -->
+&lt;aside&gt;&lt;/aside&gt;      <!-- 侧边栏 -->
+&lt;footer&gt;&lt;/footer&gt;    <!-- 页面底部 --></code></pre>
+                
+                <h3>2. 多媒体支持</h3>
+                <p>HTML5原生支持音频和视频，不再需要依赖Flash等插件：</p>
+                <pre><code>&lt;!-- 视频播放 --&gt;
+&lt;video controls width="600"&gt;
+    &lt;source src="movie.mp4" type="video/mp4"&gt;
+    &lt;source src="movie.ogg" type="video/ogg"&gt;
+    您的浏览器不支持视频标签。
+&lt;/video&gt;
+
+&lt;!-- 音频播放 --&gt;
+&lt;audio controls&gt;
+    &lt;source src="audio.mp3" type="audio/mpeg"&gt;
+    &lt;source src="audio.ogg" type="audio/ogg"&gt;
+    您的浏览器不支持音频标签。
+&lt;/audio&gt;</code></pre>
+                
+                <h3>3. 表单增强</h3>
+                <p>HTML5提供了更多表单控件和验证功能：</p>
+                <pre><code>&lt;input type="email" placeholder="请输入邮箱" required&gt;
+&lt;input type="tel" placeholder="请输入电话" pattern="[0-9]{11}"&gt;
+&lt;input type="url" placeholder="请输入网址"&gt;
+&lt;input type="date" min="2024-01-01" max="2024-12-31"&gt;
+&lt;input type="number" min="1" max="100" step="1"&gt;
+&lt;input type="range" min="0" max="100" value="50"&gt;
+&lt;select&gt;
+    &lt;option value=""&gt;请选择&lt;/option&gt;
+    &lt;optgroup label="水果"&gt;
+        &lt;option value="apple"&gt;苹果&lt;/option&gt;
+        &lt;option value="banana"&gt;香蕉&lt;/option&gt;
+    &lt;/optgroup&gt;
+&lt;/select&gt;</code></pre>
+                
+                <h3>4. 图形绘制</h3>
+                <p>HTML5提供了Canvas API和SVG，使得在浏览器中绘制图形变得简单：</p>
+                <pre><code>&lt;!-- Canvas --&gt;
+&lt;canvas id="myCanvas" width="400" height="300"&gt;&lt;/canvas&gt;
+&lt;script&gt;
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+ctx.fillStyle = '#f97316';
+ctx.fillRect(50, 50, 100, 100);
+ctx.beginPath();
+ctx.arc(200, 100, 50, 0, Math.PI * 2);
+ctx.fillStyle = '#10b981';
+ctx.fill();
+&lt;/script&gt;
+
+&lt;!-- SVG --&gt;
+&lt;svg width="400" height="300"&gt;
+    &lt;circle cx="200" cy="150" r="80" fill="#f97316"/&gt;
+    &lt;rect x="50" y="50" width="100" height="100" fill="#10b981"/&gt;
+&lt;/svg&gt;</code></pre>
+                
+                <h3>5. 本地存储</h3>
+                <p>HTML5提供了localStorage和sessionStorage，使得在浏览器端存储数据变得简单：</p>
+                <pre><code>// localStorage - 永久存储
+localStorage.setItem('username', '张三');
+const username = localStorage.getItem('username');
+localStorage.removeItem('username');
+
+// sessionStorage - 会话存储
+sessionStorage.setItem('tempData', '临时数据');
+const tempData = sessionStorage.getItem('tempData');
+sessionStorage.clear();</code></pre>
+                
+                <h2>HTML5的重要API</h2>
+                
+                <h3>1. Geolocation API</h3>
+                <p>获取用户地理位置：</p>
+                <pre><code>navigator.geolocation.getCurrentPosition(
+    (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        console.log(`位置: ${lat}, ${lng}`);
+    },
+    (error) => {
+        console.error('获取位置失败:', error);
+    }
+);</code></pre>
+                
+                <h3>2. Web Storage API</h3>
+                <p>客户端存储解决方案：</p>
+                <pre><code>// 存储对象
+const user = { name: '张三', age: 25 };
+localStorage.setItem('user', JSON.stringify(user));
+const storedUser = JSON.parse(localStorage.getItem('user'));
+
+// 存储数组
+const todos = ['任务1', '任务2', '任务3'];
+localStorage.setItem('todos', JSON.stringify(todos));</code></pre>
+                
+                <h3>3. Drag and Drop API</h3>
+                <p>实现拖拽功能：</p>
+                <pre><code>&lt;div id="drag-item" draggable="true"&gt;拖拽我&lt;/div&gt;
+&lt;div id="drop-zone"&gt;放置区域&lt;/div&gt;
+
+&lt;script&gt;
+const dragItem = document.getElementById('drag-item');
+const dropZone = document.getElementById('drop-zone');
+
+dragItem.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', '拖拽数据');
+});
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault(); // 允许放置
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const data = e.dataTransfer.getData('text/plain');
+    console.log('接收到:', data);
+});
+&lt;/script&gt;</code></pre>
+                
+                <h3>4. Web Workers</h3>
+                <p>在后台线程执行JavaScript：</p>
+                <pre><code>// main.js
+const worker = new Worker('worker.js');
+worker.postMessage({ data: '处理数据' });
+worker.onmessage = (e) => {
+    console.log('收到结果:', e.data);
+};
+
+// worker.js
+self.onmessage = (e) => {
+    const result = process(e.data.data);
+    self.postMessage(result);
+};</code></pre>
+                
+                <h3>5. WebSocket</h3>
+                <p>实现实时双向通信：</p>
+                <pre><code>const socket = new WebSocket('ws://localhost:8080');
+
+socket.onopen = () => {
+    console.log('连接已建立');
+    socket.send('Hello Server');
+};
+
+socket.onmessage = (e) => {
+    console.log('收到消息:', e.data);
+};
+
+socket.onclose = () => {
+    console.log('连接已关闭');
+};
+
+socket.onerror = (error) => {
+    console.error('WebSocket错误:', error);
+};</code></pre>
+                
+                <h2>HTML5最佳实践</h2>
+                
+                <h3>1. DOCTYPE声明</h3>
+                <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="zh-CN"&gt;</code></pre>
+                
+                <h3>2. Meta标签</h3>
+                <pre><code>&lt;meta charset="UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;meta name="description" content="页面描述"&gt;
+&lt;meta name="keywords" content="关键词1,关键词2"&gt;
+&lt;meta name="author" content="作者"&gt;</code></pre>
+                
+                <h3>3. 可访问性</h3>
+                <pre><code>&lt;!-- 使用语义化标签 --&gt;
+&lt;nav aria-label="主导航"&gt;&lt;/nav&gt;
+
+&lt;!-- 图片添加alt属性 --&gt;
+&lt;img src="image.jpg" alt="图片描述"&gt;
+
+&lt;!-- 表单关联label --&gt;
+&lt;label for="email"&gt;邮箱&lt;/label&gt;
+&lt;input type="email" id="email" name="email"&gt;
+
+&lt;!-- ARIA标签 --&gt;
+&lt;button aria-label="关闭" aria-pressed="false"&gt;&times;&lt;/button&gt;</code></pre>
+                
+                <h3>4. 性能优化</h3>
+                <ul>
+                    <li>使用异步加载JavaScript</li>
+                    <li>图片懒加载（loading="lazy"）</li>
+                    <li>使用现代图片格式（WebP）</li>
+                    <li>减少DOM操作</li>
+                    <li>使用事件委托</li>
+                </ul>
+                
+                <h2>总结</h2>
+                <p>HTML5是现代Web开发的基石，掌握HTML5的核心特性和API对于前端开发者至关重要。通过合理使用语义化标签、多媒体支持、本地存储和各种API，我们可以构建出功能强大、性能优秀的Web应用。</p>
+                <p>在实际开发中，要注重代码的语义化、可访问性和性能优化，为用户提供更好的体验。</p>
+            </div>
+        </article>
+    </main>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <div class="footer__logo"><span class="nav__logo-text">刀仔的学习网站</span></div>
+                <p class="footer__text">记录生活 · 分享技术 · 持续成长</p>
+            </div>
+            <div class="footer__bottom"><p class="footer__copyright">© 2024 陈刀仔. 保留所有权利.</p></div>
+        </div>
+    </footer>
+    <script src="main.js"></script>
+</body>
+</html>

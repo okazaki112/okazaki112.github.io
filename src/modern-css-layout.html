@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>现代CSS布局技巧 - 刀仔的学习网站</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .article-container { max-width: 800px; margin: 0 auto; padding: 80px 20px; }
+        .article-header { margin-bottom: 40px; }
+        .article-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .article-tag { display: inline-block; padding: 4px 12px; background: var(--color-primary); color: white; font-size: 14px; font-weight: 600; border-radius: 20px; }
+        .article-date { font-size: 14px; color: var(--color-text-tertiary); }
+        .article-title { font-family: var(--font-family-heading); font-size: 48px; font-weight: 700; line-height: 1.2; color: var(--color-text); margin-bottom: 24px; }
+        .article-excerpt { font-size: 20px; color: var(--color-text-secondary); line-height: 1.6; }
+        .article-content { font-size: 18px; line-height: 1.8; color: var(--color-text); }
+        .article-content h2 { font-family: var(--font-family-heading); font-size: 32px; font-weight: 700; margin: 48px 0 24px; color: var(--color-text); border-bottom: 2px solid var(--color-border); padding-bottom: 12px; }
+        .article-content h3 { font-size: 24px; font-weight: 600; margin: 32px 0 16px; color: var(--color-text); }
+        .article-content p { margin-bottom: 24px; }
+        .article-content ul, .article-content ol { margin: 24px 0; padding-left: 32px; }
+        .article-content li { margin-bottom: 12px; }
+        .article-content code { font-family: 'Courier New', monospace; background: var(--color-bg-tertiary); padding: 2px 6px; border-radius: 4px; font-size: 16px; }
+        .article-content pre { background: var(--color-bg-tertiary); padding: 20px; border-radius: 12px; overflow-x: auto; margin: 24px 0; }
+        .article-content pre code { background: none; padding: 0; font-size: 14px; }
+        .article-content blockquote { border-left: 4px solid var(--color-primary); padding-left: 20px; margin: 24px 0; color: var(--color-text-secondary); font-style: italic; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-secondary); text-decoration: none; font-weight: 500; transition: color 0.3s ease; margin-bottom: 32px; }
+        .back-link:hover { color: var(--color-primary); }
+        @media (max-width: 768px) {
+            .article-container { padding: 40px 16px; }
+            .article-title { font-size: 32px; }
+            .article-content { font-size: 16px; }
+            .article-content h2 { font-size: 24px; }
+            .article-content h3 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <a href="../index.html" class="nav__logo"><span class="nav__logo-text">刀仔的学习网站</span></a>
+                <ul class="nav__menu">
+                    <li class="nav__item"><a href="../index.html#home" class="nav__link">首页</a></li>
+                    <li class="nav__item"><a href="../index.html#articles" class="nav__link nav__link--active">文章</a></li>
+                    <li class="nav__item"><a href="../index.html#about" class="nav__link">关于</a></li>
+                    <li class="nav__item"><a href="../index.html#contact" class="nav__link">联系</a></li>
+                </ul>
+                <div class="nav__actions">
+                    <button class="theme-toggle" aria-label="切换主题" data-theme-toggle>
+                        <span class="theme-toggle__icon theme-toggle__icon--sun"><span class="iconify" data-icon="ph:sun-bold"></span></span>
+                        <span class="theme-toggle__icon theme-toggle__icon--moon"><span class="iconify" data-icon="ph:moon-bold"></span></span>
+                    </button>
+                    <button class="nav__toggle" aria-label="切换菜单" data-nav-toggle><span class="iconify" data-icon="ph:list-bold"></span></button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="article-container">
+        <a href="../index.html#articles" class="back-link"><span class="iconify" data-icon="ph:arrow-left-bold"></span>返回文章列表</a>
+        <article>
+            <header class="article-header">
+                <div class="article-meta"><span class="article-tag">CSS技巧</span><time class="article-date" datetime="2026-01-05">2026年1月5日</time></div>
+                <h1 class="article-title">现代CSS布局技巧</h1>
+                <p class="article-excerpt">Flexbox和Grid彻底改变了网页布局。本文将介绍这两种布局技术的核心概念和实用技巧。</p>
+            </header>
+            <div class="article-content">
+                <h2>Flexbox布局</h2>
+                <p>Flexbox（弹性盒子）是CSS3引入的一维布局模型，非常适合在单一方向上布局元素。</p>
+                
+                <h3>基本概念</h3>
+                <pre><code>.container {
+    display: flex;
+    flex-direction: row; /* 主轴方向 */
+    justify-content: center; /* 主轴对齐 */
+    align-items: center; /* 交叉轴对齐 */
+    gap: 16px; /* 间距 */
+}
+
+.item {
+    flex: 1; /* 弹性放大 */
+    flex-shrink: 0; /* 不收缩 */
+}</code></pre>
+                
+                <h3>实用技巧</h3>
+                <ul>
+                    <li>居中对齐：`justify-content: center; align-items: center;`</li>
+                    <li>两端对齐：`justify-content: space-between;`</li>
+                    <li>自动填充：`flex-wrap: wrap;`</li>
+                    <li>垂直居中：`align-items: center;`</li>
+                </ul>
+                
+                <h2>Grid布局</h2>
+                <p>Grid（网格布局）是CSS3引入的二维布局模型，可以同时在行和列方向上布局元素。</p>
+                
+                <h3>基本概念</h3>
+                <pre><code>.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3列等宽 */
+    grid-template-rows: auto; /* 行高自动 */
+    gap: 20px; /* 间距 */
+    grid-template-areas: 
+        "header header header"
+        "sidebar content content"
+        "footer footer footer";
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.content { grid-area: content; }
+.footer { grid-area: footer; }</code></pre>
+                
+                <h3>实用技巧</h3>
+                <ul>
+                    <li>自适应列数：`grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));`</li>
+                    <li>命名区域：使用`grid-template-areas`创建语义化布局</li>
+                    <li>自动填充：`grid-auto-flow: dense;`</li>
+                    <li>对齐控制：`place-items: center;`</li>
+                </ul>
+                
+                <h2>布局组合技巧</h2>
+                
+                <h3>1. 圣杯布局</h3>
+                <pre><code>.layout {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: 
+        "header header header"
+        "nav main aside"
+        "footer footer footer";
+    min-height: 100vh;
+}</code></pre>
+                
+                <h3>2. 响应式卡片网格</h3>
+                <pre><code>.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+}</code></pre>
+                
+                <h2>现代布局最佳实践</h2>
+                <ul>
+                    <li>优先使用Flexbox处理一维布局</li>
+                    <li>使用Grid处理二维布局</li>
+                    <li>结合使用实现复杂布局</li>
+                    <li>使用CSS变量提高可维护性</li>
+                    <li>使用容器查询实现组件级响应式</li>
+                </ul>
+                
+                <h2>结语</h2>
+                <p>Flexbox和Grid彻底改变了CSS布局的方式，让我们能够用更少的代码实现更复杂的布局效果。掌握这两种技术，是现代前端开发者的必备技能。</p>
+            </div>
+        </article>
+    </main>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__content">
+                <div class="footer__logo"><span class="nav__logo-text">刀仔的学习网站</span></div>
+                <p class="footer__text">记录生活 · 分享技术 · 持续成长</p>
+            </div>
+            <div class="footer__bottom"><p class="footer__copyright">© 2024 陈刀仔. 保留所有权利.</p></div>
+        </div>
+    </footer>
+    <script src="main.js"></script>
+</body>
+</html>
