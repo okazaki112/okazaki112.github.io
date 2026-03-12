@@ -1,0 +1,289 @@
+/* ========================================
+   暖色渐变配色 - 温暖活力风格
+   ======================================== */
+
+/* Google Fonts - 暖色风格字体 */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* ========================================
+   CSS 变量 - 暖色主题
+   ======================================== */
+:root {
+  /* 主色调 - 温暖橙/珊瑚/粉 */
+  --primary: #FF6B35;
+  --primary-light: #FF8F66;
+  --primary-dark: #E85A2A;
+  
+  --secondary: #F7931E;
+  --secondary-light: #FFB347;
+  
+  --accent: #FF4757;
+  --accent-light: #FF6B7A;
+  
+  --tertiary: #FF7F50;
+  --tertiary-light: #FFA07A;
+
+  /* 渐变 */
+  --gradient-primary: linear-gradient(135deg, #FF6B35 0%, #FF4757 50%, #F7931E 100%);
+  --gradient-secondary: linear-gradient(135deg, #F7931E 0%, #FF6B35 100%);
+  --gradient-accent: linear-gradient(135deg, #FF4757 0%, #FF6B35 50%, #F7931E 100%);
+  --gradient-warm: linear-gradient(135deg, #FF6B35 0%, #FF7F50 25%, #FF4757 50%, #F7931E 75%, #FFB347 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(255, 107, 53, 0.5), rgba(255, 71, 87, 0.5), rgba(247, 147, 30, 0.5));
+  --gradient-card: linear-gradient(145deg, rgba(40, 35, 30, 0.9), rgba(30, 25, 20, 0.95));
+
+  /* 背景色 - 深暖色 */
+  --bg-base: #0D0D0D;
+  --bg-elevated: #1A1614;
+  --bg-surface: #241F1C;
+  --bg-overlay: rgba(13, 13, 13, 0.95);
+
+  /* 文字颜色 */
+  --text-primary: #FFFBF7;
+  --text-secondary: #E8E0D8;
+  --text-tertiary: #B8A99A;
+  --text-muted: #8A7B6C;
+
+  /* 边框 */
+  --border-subtle: rgba(255, 107, 53, 0.08);
+  --border-default: rgba(255, 107, 53, 0.15);
+  --border-strong: rgba(255, 107, 53, 0.3);
+
+  /* 字体 */
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* 字号 */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* 间距 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* 圆角 */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 40px rgba(255, 107, 53, 0.3);
+  --shadow-warm: 0 10px 40px rgba(255, 107, 53, 0.2);
+
+  /* 动画 */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* Z-index */
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-fixed: 30;
+  --z-modal: 40;
+  --z-tooltip: 50;
+}
+
+/* ========================================
+   全局重置
+   ======================================== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* 选择文本颜色 */
+::selection {
+  background: rgba(255, 107, 53, 0.3);
+  color: var(--text-primary);
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ========================================
+   全局进度条
+   ======================================== */
+.global-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-warm);
+  transform-origin: left;
+  z-index: calc(var(--z-fixed) + 1);
+}
+
+/* ========================================
+   通用组件
+   ======================================== */
+.section-label {
+  display: inline-block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--primary-light);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-default);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-5xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+}
+
+.section-subtitle {
+  color: var(--text-tertiary);
+  font-size: var(--text-base);
+  margin-top: var(--space-3);
+}
+
+/* ========================================
+   响应式
+   ======================================== */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+
+  .section-title {
+    font-size: var(--text-3xl);
+  }
+}
+
+/* ========================================
+   动画
+   ======================================== */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-warm {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(255, 107, 53, 0);
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ========================================
+   无障碍
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Focus states */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button, a {
+  cursor: pointer;
+}
+
+/* ========================================
+   App 容器
+   ======================================== */
+.app {
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+main {
+  position: relative;
+}

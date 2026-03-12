@@ -1,0 +1,237 @@
+.projects {
+  padding: var(--space-24) var(--space-8);
+  background: var(--bg-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.projects-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.projects-header {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+.section-subtitle {
+  color: var(--text-tertiary);
+  font-size: var(--text-base);
+  margin-top: var(--space-3);
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
+
+.project-card {
+  position: relative;
+  background: rgba(36, 31, 28, 0.4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--duration-normal) ease;
+}
+
+.project-card:hover {
+  border-color: var(--border-default);
+}
+
+.card-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200%;
+  height: 200%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.project-card-inner {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-6);
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-5);
+}
+
+.project-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.project-number {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  color: var(--text-muted);
+  opacity: 0.3;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.project-card:hover .project-number {
+  opacity: 0.6;
+}
+
+.project-body {
+  margin-bottom: var(--space-5);
+}
+
+.project-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.project-description {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  margin-bottom: var(--space-4);
+}
+
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tech-tag {
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--primary-light);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  cursor: default;
+  transition: all var(--duration-fast) ease;
+}
+
+.tech-tag:hover {
+  background: rgba(255, 107, 53, 0.2);
+}
+
+.project-footer {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  color: var(--primary-light);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--duration-fast) ease;
+}
+
+.project-link:hover {
+  color: var(--text-primary);
+}
+
+.project-link svg {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--duration-fast) ease;
+}
+
+.project-link:hover svg {
+  transform: translateX(4px);
+}
+
+.card-border {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  border: 1px solid transparent;
+  background: linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box,
+              linear-gradient(135deg, var(--project-color), transparent) border-box;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  opacity: 0;
+  transition: opacity var(--duration-normal) ease;
+  pointer-events: none;
+}
+
+.project-card:hover .card-border {
+  opacity: 1;
+}
+
+/* 背景装饰 */
+.projects-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-line {
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--border-subtle), transparent);
+}
+
+.line-1 {
+  left: 20%;
+}
+
+.line-2 {
+  right: 20%;
+}
+
+@media (max-width: 768px) {
+  .projects {
+    padding: var(--space-16) var(--space-4);
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  .project-card-inner {
+    padding: var(--space-5);
+  }
+
+  .project-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .project-title {
+    font-size: var(--text-lg);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-sm);
+  }
+}
