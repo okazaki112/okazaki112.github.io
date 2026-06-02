@@ -1,0 +1,2516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas 音频可视化频谱特效</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        #canvas {
+            display: block;
+            background: radial-gradient(ellipse at center, #0a0a1a 0%, #000 100%);
+        }
+        
+        #controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            background: rgba(10, 10, 30, 0.85);
+            padding: 20px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(100, 200, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(100, 150, 255, 0.1);
+            min-width: 500px;
+        }
+        
+        #progressContainer {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        #progressBar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #progressFill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            border-radius: 3px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        
+        #progressHandle {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+            cursor: grab;
+            left: 0%;
+            transition: left 0.1s linear;
+        }
+        
+        #progressHandle:active {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+        
+        #timeDisplay {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            font-family: monospace;
+            min-width: 90px;
+            text-align: right;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 70px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 添加音乐 - 蓝色 */
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.25));
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #60a5fa;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.4));
+            border-color: rgba(96, 165, 250, 0.7);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+        }
+
+        /* 播放/暂停 - 绿色 */
+        #playPauseBtn {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(22, 163, 74, 0.25));
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #4ade80;
+            min-width: 80px;
+        }
+
+        #playPauseBtn:hover {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.4), rgba(22, 163, 74, 0.4));
+            border-color: rgba(74, 222, 128, 0.7);
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+        }
+
+        #playPauseBtn.paused {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.25));
+            border-color: rgba(245, 158, 11, 0.5);
+            color: #fbbf24;
+        }
+
+        #playPauseBtn.paused:hover {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4));
+            border-color: rgba(251, 191, 36, 0.7);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+        }
+
+        /* 停止 - 红色 */
+        #resetBtn {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+
+        #resetBtn:hover {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(220, 38, 38, 0.35));
+            border-color: rgba(248, 113, 113, 0.6);
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        /* 麦克风 - 紫色 */
+        #micBtn {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(147, 51, 234, 0.2));
+            border-color: rgba(168, 85, 247, 0.4);
+            color: #c084fc;
+        }
+
+        #micBtn:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(147, 51, 234, 0.35));
+            border-color: rgba(192, 132, 252, 0.6);
+            box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+        }
+
+        /* 清空列表 - 灰色 */
+        #clearBtn {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.2), rgba(75, 85, 99, 0.2));
+            border-color: rgba(107, 114, 128, 0.4);
+            color: #9ca3af;
+        }
+
+        #clearBtn:hover {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.35), rgba(75, 85, 99, 0.35));
+            border-color: rgba(156, 163, 175, 0.6);
+            box-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
+        }
+
+        /* 播放模式 - 青色 */
+        #playModeBtn {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(8, 145, 178, 0.2));
+            border-color: rgba(6, 182, 212, 0.4);
+            color: #67e8f9;
+            min-width: 90px;
+        }
+
+        #playModeBtn:hover {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(8, 145, 178, 0.35));
+            border-color: rgba(103, 232, 249, 0.6);
+            box-shadow: 0 4px 16px rgba(6, 182, 212, 0.3);
+        }
+        
+        #resetBtn:hover {
+            background: linear-gradient(135deg, rgba(255, 100, 100, 0.25), rgba(200, 50, 50, 0.25));
+            border-color: rgba(255, 100, 100, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 100, 100, 0.2);
+        }
+        
+        #info {
+           /*  position: fixed;
+            top: 60px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 150px;
+            display: none;  /* 隐藏信息面板 */
+        }
+        
+        #info div {
+            margin: 4px 0;
+            white-space: nowrap;
+        }
+        
+        #fps {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: #00ff88;
+            font-size: 14px;
+            font-family: monospace;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        #trackInfo {
+            position: fixed;
+            bottom: 155px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            z-index: 100;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #playlistContainer {
+            position: fixed;
+            top: 180px;
+            right: 20px;
+            width: 280px;
+            z-index: 100;
+        }
+
+        #playlistHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            cursor: pointer;
+        }
+
+        #playlistTitle {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #playlistToggle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            transition: transform 0.3s ease;
+        }
+
+        #playlistContainer.collapsed #playlistToggle {
+            transform: rotate(-90deg);
+        }
+
+        #playlistContainer.collapsed #playlistBody {
+            display: none;
+        }
+
+        #playlistBody {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #playlistBody::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #playlistBody::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #playlistBody::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        #playlistDropZone {
+            padding: 12px 0;
+            text-align: left;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 11px;
+        }
+
+        .playlistItem {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .playlistItem:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .playlistItem.playing {
+            color: #00d4ff;
+        }
+
+        .playlistItemIndex {
+            width: 24px;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 10px;
+        }
+
+        .playlistItem.playing .playlistItemIndex {
+            color: #00d4ff;
+        }
+
+        .playlistItemName {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .playlistItemRemove {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 100, 100, 0.6);
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .playlistItem:hover .playlistItemRemove {
+            opacity: 1;
+        }
+
+        .playlistItemRemove:hover {
+            color: #ff6464;
+        }
+
+        #playlistEmpty {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 11px;
+            padding: 20px 0;
+        }
+
+        /* 粒子特效控制面板 */
+        #particleControls {
+            position: fixed;
+            bottom: 180px;
+            left: 20px;
+            width: 160px;
+            z-index: 100;
+        }
+
+        #particleHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        #particleToggle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            transition: transform 0.3s ease;
+        }
+
+        #particleControls.collapsed #particleToggle {
+            transform: rotate(-90deg);
+        }
+
+        #particleControls.collapsed #particleBody {
+            display: none;
+        }
+
+        #particleBody {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .particleCheckbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color 0.2s ease;
+        }
+
+        .particleCheckbox:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .particleCheckbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            accent-color: #00d4ff;
+        }
+
+        .particleCheckbox span {
+            user-select: none;
+        }
+
+        /* SVG 图标样式 */
+        .checkbox-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .checkbox-icon svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* 圆形粒子专用样式 */
+        .circle-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* 全局开关特殊样式 */
+        .particleCheckbox.globalSwitch {
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .particleCheckbox.globalSwitch input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 分隔线 */
+        .particleDivider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+        }
+
+        /* 滑块容器 */
+        .particleSliderContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 4px 0;
+        }
+
+        .particleSliderLabel {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            user-select: none;
+        }
+
+        /* 滑块样式 */
+        .particleSlider {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .particleSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00d4ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .particleSlider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00d4ff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .particleSlider::-webkit-slider-runnable-track {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .particleSlider::-moz-range-track {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="playlistContainer">
+        <div id="playlistHeader">
+            <div id="playlistTitle">📋 播放列表 (<span id="playlistCount">0</span>)</div>
+            <span id="playlistToggle">▼</span>
+        </div>
+        <div id="playlistBody">
+            <div id="playlistDropZone">
+                拖放音频文件到此处添加
+            </div>
+            <div id="playlistItems"></div>
+            <div id="playlistEmpty" style="display: none;">播放列表为空</div>
+        </div>
+    </div>
+    
+    <div id="info">
+        <div>🎵 频谱分辨率: <span id="freqBins">128</span></div>
+        <div>✨ 粒子数量: <span id="particleCount">0</span>/300</div>
+        <div>🔊 音量: <span id="volume">0</span>%</div>
+        <div>🎚️ 低音能量: <span id="bassEnergy">0</span></div>
+    </div>
+    
+    <div id="trackInfo">未播放</div>
+    
+    <div id="fps">FPS: 60</div>
+    
+    <div id="controls">
+        <div id="progressContainer">
+            <div id="progressBar">
+                <div id="progressFill"></div>
+                <div id="progressHandle"></div>
+            </div>
+            <span id="timeDisplay">0:00 / 0:00</span>
+        </div>
+        <div class="btn-row">
+            <input type="file" id="fileInput" accept="audio/*">
+            <label for="fileInput" class="btn btn-primary" id="fileLabel">添加音乐</label>
+            <button class="btn" id="playPauseBtn" disabled>播放</button>
+            <button class="btn" id="resetBtn">停止</button>
+            <button class="btn" id="micBtn">麦克风</button>
+            <button class="btn" id="clearBtn">清空列表</button>
+            <button class="btn" id="playModeBtn" title="切换播放模式">顺序播放</button>
+        </div>
+    </div>
+
+    <!-- 粒子特效控制面板 -->
+    <div id="particleControls">
+        <div id="particleHeader">
+            <span>粒子特效</span>
+            <span id="particleToggle">▼</span>
+        </div>
+        <div id="particleBody">
+            <!-- 全局开关 -->
+            <label class="particleCheckbox globalSwitch">
+                <input type="checkbox" id="particleGlobal" checked>
+                <span class="checkbox-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></span>
+                <span>全局开关</span>
+            </label>
+            <div class="particleDivider"></div>
+            <!-- 粒子数量滑块 -->
+            <div class="particleSliderContainer">
+                <span class="particleSliderLabel">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="vertical-align:middle;margin-right:4px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                    粒子数量: <span id="particleCountValue">3</span>
+                </span>
+                <input type="range" id="particleCountSlider" min="1" max="10" value="3" class="particleSlider">
+            </div>
+            <div class="particleDivider"></div>
+            <!-- 粒子类型选择 -->
+            <label class="particleCheckbox">
+                <input type="checkbox" id="particleCircle" checked>
+                <span class="checkbox-icon circle-icon"></span>
+                <span>圆形粒子</span>
+            </label>
+            <label class="particleCheckbox">
+                <input type="checkbox" id="particleStar">
+                <span class="checkbox-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+                <span>星星</span>
+            </label>
+            <label class="particleCheckbox">
+                <input type="checkbox" id="particleHeart">
+                <span class="checkbox-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
+                <span>心形</span>
+            </label>
+            <label class="particleCheckbox">
+                <input type="checkbox" id="particleNote">
+                <span class="checkbox-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></span>
+                <span>音符</span>
+            </label>
+            <label class="particleCheckbox">
+                <input type="checkbox" id="particleDiamond">
+                <span class="checkbox-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2L4 10l8 10 8-10L12 2zm0 3.5L17.5 10 12 16.5 6.5 10 12 5.5z"/></svg></span>
+                <span>钻石</span>
+            </label>
+            <label class="particleCheckbox">
+                <input type="checkbox" id="particleSparkle">
+                <span class="checkbox-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z"/></svg></span>
+                <span>闪光</span>
+            </label>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 音频可视化器 - 高性能版本
+        // 严格遵循内存管控和GC规避原则
+        // ============================================
+        
+        'use strict';
+        
+        // ========== 常量定义 ==========
+        const FFT_SIZE = 512;                    // FFT大小 (输出256个频谱数据点)
+        const SPECTRUM_LENGTH = 256;             // 固定频谱数组长度
+        const MAX_PARTICLES = 300;               // 最大粒子数量 (降低以提升性能)
+        const PARTICLE_POOL_SIZE = 300;          // 粒子池大小
+        const BAR_COUNT = 64;                    // 频谱柱数量 (降低以提升性能)
+        const CIRCLE_BARS = 32;                  // 圆形频谱条数 (降低以提升性能)
+        
+        // 视觉效果参数
+        const GLOW_INTENSITY = 15;               // 发光强度 (降低以提升性能)
+        const PARTICLE_SPAWN_RATE = 3;           // 粒子生成倍率 (降低以提升性能)
+        const TRAIL_LENGTH = 3;                  // 拖尾长度 (降低以提升性能)
+        
+        // ========== 全局变量 ==========
+        let canvas, ctx;
+        let offscreenCanvas, offscreenCtx;
+        let audioContext, analyser, source;
+        let isPlaying = false;
+        let isPaused = false;
+        let animationId;
+        let currentTrackName = '';
+        let audioBuffer = null;                  // 保存当前音频buffer用于暂停/恢复
+        let pauseTime = 0;                       // 暂停时的时间
+        let startTime = 0;                       // 开始播放的时间
+        
+        // 播放列表
+        let playlist = [];                       // 播放列表数组
+        let currentTrackIndex = -1;              // 当前播放曲目索引
+        const PLAYLIST_STORAGE_KEY = 'audioVisualizer_playlist';  // localStorage 键名
+        let db = null;                           // IndexedDB 数据库实例
+        const DB_NAME = 'AudioVisualizerDB';     // 数据库名称
+        const DB_VERSION = 2;                    // 数据库版本（升级以支持文件存储）
+
+        // 播放模式
+        const PLAY_MODES = {
+            SEQUENTIAL: 'sequential',    // 顺序播放
+            LOOP: 'loop',                // 列表循环
+            RANDOM: 'random'             // 随机播放
+        };
+        let currentPlayMode = PLAY_MODES.SEQUENTIAL;  // 默认顺序播放
+        let isManualStop = false;       // 标志：是否是手动停止（用于区分自然结束）
+
+        // 粒子特效配置
+        const particleEffects = {
+            circle: { enabled: true, name: '圆形粒子' },
+            star: { enabled: false, name: '星星' },
+            heart: { enabled: false, name: '心形' },
+            note: { enabled: false, name: '音符' },
+            diamond: { enabled: false, name: '钻石' },
+            sparkle: { enabled: false, name: '闪光' }
+        };
+
+        // 粒子全局设置
+        let particleSpawnMultiplier = 3;         // 粒子生成倍率 (1-10)
+        
+        // 预分配的频谱数据数组 (使用Uint8Array避免GC)
+        const spectrumData = new Uint8Array(SPECTRUM_LENGTH);
+        const waveformData = new Uint8Array(SPECTRUM_LENGTH);
+        
+        // 粒子池 - 预分配，避免动态创建
+        const particlePool = [];
+        const activeParticles = [];
+        
+        // 性能监控
+        let lastTime = 0;
+        let frameCount = 0;
+        let fps = 60;
+        let targetSpectrumLength = 128;        // 默认频谱分辨率128（平衡性能和效果）
+        
+        // 粒子生成冷却时间控制
+        let lastParticleSpawnTime = 0;
+        const PARTICLE_SPAWN_COOLDOWN = 200; // 200ms 基础冷却时间
+
+        // 重音检测相关变量
+        const ENERGY_HISTORY_SIZE = 30;      // 能量历史缓冲区大小（约0.5秒）
+        const energyHistory = new Float32Array(ENERGY_HISTORY_SIZE);
+        let energyHistoryIndex = 0;
+        let energyHistorySum = 0;
+        let energyHistoryFilled = false;     // 缓冲区是否已填满
+        let lastPeakEnergy = 0;              // 上次峰值能量
+        let peakDecayFactor = 0.95;          // 峰值衰减系数
+        let beatDetected = false;            // 是否检测到节拍
+        let beatFrameCount = 0;              // 重音检测帧计数（用于初始化）
+        
+        // 圆形频谱旋转角度
+        let rotationAngle = 0;
+        
+        // 预计算的颜色表 (避免每帧计算)
+        const colorTable = new Uint32Array(256);
+        
+        // 频谱柱缓存
+        const barCache = {
+            widths: new Float32Array(BAR_COUNT),
+            positions: new Float32Array(BAR_COUNT)
+        };
+        
+        // 频谱历史数据 (用于拖尾效果)
+        const spectrumHistory = [];
+        for (let i = 0; i < TRAIL_LENGTH; i++) {
+            spectrumHistory.push(new Uint8Array(BAR_COUNT));
+        }
+        
+        // ========== 初始化 ==========
+        function init() {
+            console.log('初始化开始...');
+            
+            canvas = document.getElementById('canvas');
+            if (!canvas) {
+                console.error('找不到 canvas 元素');
+                return;
+            }
+            
+            ctx = canvas.getContext('2d', { alpha: false });
+            if (!ctx) {
+                console.error('无法获取 canvas 上下文');
+                return;
+            }
+            
+            // 创建离屏Canvas用于缓存静态背景
+            offscreenCanvas = document.createElement('canvas');
+            offscreenCtx = offscreenCanvas.getContext('2d');
+            
+            // 初始化粒子池
+            initParticlePool();
+            
+            // 预计算颜色表
+            initColorTable();
+            
+            // 设置画布大小 (这会调用 initBarCache)
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas, { passive: true });
+            
+            // 绑定事件
+            const fileInput = document.getElementById('fileInput');
+            const micBtn = document.getElementById('micBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', handleFileSelect);
+                console.log('文件选择事件已绑定');
+            } else {
+                console.error('找不到 fileInput 元素');
+            }
+
+            if (micBtn) {
+                micBtn.addEventListener('click', handleMicInput);
+            }
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', clearPlaylist);
+            }
+
+            if (playPauseBtn) {
+                playPauseBtn.addEventListener('click', togglePlayPause);
+            }
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', stopAudio);
+            }
+
+            // 播放模式按钮
+            const playModeBtn = document.getElementById('playModeBtn');
+            if (playModeBtn) {
+                playModeBtn.addEventListener('click', togglePlayMode);
+            }
+
+            // 进度条事件
+            initProgressBar();
+
+            // 播放列表初始化
+            initPlaylist();
+
+            // 粒子特效控制初始化
+            initParticleControls();
+
+            console.log('初始化完成');
+
+            // 开始渲染循环
+            requestAnimationFrame(renderLoop);
+        }
+
+        // ========== 粒子特效控制初始化 ==========
+        function initParticleControls() {
+            const particleHeader = document.getElementById('particleHeader');
+            const particleControls = document.getElementById('particleControls');
+
+            // 折叠/展开
+            if (particleHeader) {
+                particleHeader.addEventListener('click', () => {
+                    particleControls.classList.toggle('collapsed');
+                });
+            }
+
+            // 绑定复选框事件
+            const checkboxes = {
+                'particleCircle': 'circle',
+                'particleStar': 'star',
+                'particleHeart': 'heart',
+                'particleNote': 'note',
+                'particleDiamond': 'diamond',
+                'particleSparkle': 'sparkle'
+            };
+
+            // 先绑定各个粒子类型的复选框
+            for (const [id, type] of Object.entries(checkboxes)) {
+                const checkbox = document.getElementById(id);
+                if (checkbox) {
+                    // 设置初始状态
+                    checkbox.checked = particleEffects[type].enabled;
+
+                    checkbox.addEventListener('change', (e) => {
+                        particleEffects[type].enabled = e.target.checked;
+                        console.log(`粒子特效 ${type}: ${e.target.checked ? '开启' : '关闭'}`);
+                    });
+                }
+            }
+
+            // 全局开关 - 一键控制所有粒子类型
+            const globalCheckbox = document.getElementById('particleGlobal');
+            if (globalCheckbox) {
+                // 根据当前启用的粒子类型设置全局开关状态
+                const anyEnabled = Object.values(particleEffects).some(effect => effect.enabled);
+                globalCheckbox.checked = anyEnabled;
+
+                globalCheckbox.addEventListener('change', (e) => {
+                    const isEnabled = e.target.checked;
+                    console.log(`粒子特效全局: ${isEnabled ? '开启' : '关闭'}`);
+
+                    // 同步所有粒子类型的状态
+                    for (const [id, type] of Object.entries(checkboxes)) {
+                        particleEffects[type].enabled = isEnabled;
+                        const checkbox = document.getElementById(id);
+                        if (checkbox) {
+                            checkbox.checked = isEnabled;
+                        }
+                    }
+                });
+            }
+
+            // 粒子数量滑块
+            const countSlider = document.getElementById('particleCountSlider');
+            const countValue = document.getElementById('particleCountValue');
+            if (countSlider && countValue) {
+                countSlider.value = particleSpawnMultiplier;
+                countValue.textContent = particleSpawnMultiplier;
+                countSlider.addEventListener('input', (e) => {
+                    particleSpawnMultiplier = parseInt(e.target.value);
+                    countValue.textContent = particleSpawnMultiplier;
+                    console.log(`粒子数量: ${particleSpawnMultiplier}`);
+                });
+            }
+        }
+        
+        // ========== 进度条功能 ==========
+        let isDraggingProgress = false;
+        let audioDuration = 0;
+        
+        // ========== 播放列表功能 ==========
+        function initPlaylist() {
+            const playlistHeader = document.getElementById('playlistHeader');
+            const playlistContainer = document.getElementById('playlistContainer');
+            const dropZone = document.getElementById('playlistDropZone');
+            
+            // 折叠/展开
+            if (playlistHeader) {
+                playlistHeader.addEventListener('click', (e) => {
+                    if (e.target.closest('.playlistItemRemove')) return;
+                    playlistContainer.classList.toggle('collapsed');
+                });
+            }
+            
+            // 拖放功能
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+                
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+                
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    handlePlaylistDrop(e.dataTransfer.files);
+                });
+            }
+            
+            // 页面级别的拖放
+            document.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            
+            document.addEventListener('drop', (e) => {
+                if (e.target.closest('#playlistContainer')) return;
+                e.preventDefault();
+                handlePlaylistDrop(e.dataTransfer.files);
+            });
+            
+            // 初始化 IndexedDB 并加载播放列表
+            initIndexedDB().then(() => {
+                loadPlaylistFromStorage();
+            });
+        }
+
+        // 初始化 IndexedDB
+        async function initIndexedDB() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) {
+                    console.warn('浏览器不支持 IndexedDB');
+                    resolve();
+                    return;
+                }
+
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => {
+                    console.error('IndexedDB 打开失败');
+                    resolve();
+                };
+
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    console.log('IndexedDB 初始化成功');
+                    resolve();
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    // 创建音频文件存储对象（存储文件内容）
+                    if (!database.objectStoreNames.contains('audioFiles')) {
+                        const audioStore = database.createObjectStore('audioFiles', { keyPath: 'name' });
+                        audioStore.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                    // 保留旧的 fileHandles 存储用于兼容
+                    if (!database.objectStoreNames.contains('fileHandles')) {
+                        database.createObjectStore('fileHandles', { keyPath: 'name' });
+                    }
+                };
+            });
+        }
+
+        // 将文件内容保存到 IndexedDB
+        async function saveAudioFileToIndexedDB(file) {
+            if (!db) return false;
+
+            try {
+                // 读取文件内容为 ArrayBuffer
+                const arrayBuffer = await file.arrayBuffer();
+
+                const transaction = db.transaction(['audioFiles'], 'readwrite');
+                const store = transaction.objectStore('audioFiles');
+
+                await new Promise((resolve, reject) => {
+                    const request = store.put({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        data: arrayBuffer,
+                        timestamp: Date.now()
+                    });
+                    request.onsuccess = resolve;
+                    request.onerror = reject;
+                });
+
+                console.log('音频文件已保存到 IndexedDB:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+                return true;
+            } catch (err) {
+                console.error('保存音频文件失败:', file.name, err);
+                return false;
+            }
+        }
+
+        // 从 IndexedDB 加载音频文件
+        async function loadAudioFileFromIndexedDB(fileName) {
+            if (!db) return null;
+
+            try {
+                const transaction = db.transaction(['audioFiles'], 'readonly');
+                const store = transaction.objectStore('audioFiles');
+
+                const result = await new Promise((resolve, reject) => {
+                    const request = store.get(fileName);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = reject;
+                });
+
+                if (result && result.data) {
+                    // 将 ArrayBuffer 转换回 File 对象
+                    const file = new File([result.data], result.name, { type: result.type });
+                    console.log('音频文件已从 IndexedDB 恢复:', fileName);
+                    return file;
+                }
+                return null;
+            } catch (err) {
+                console.error('加载音频文件失败:', fileName, err);
+                return null;
+            }
+        }
+
+        // 从 IndexedDB 删除音频文件
+        async function deleteAudioFileFromIndexedDB(fileName) {
+            if (!db) return;
+
+            try {
+                const transaction = db.transaction(['audioFiles'], 'readwrite');
+                const store = transaction.objectStore('audioFiles');
+
+                await new Promise((resolve, reject) => {
+                    const request = store.delete(fileName);
+                    request.onsuccess = resolve;
+                    request.onerror = reject;
+                });
+
+                console.log('音频文件已从 IndexedDB 删除:', fileName);
+            } catch (err) {
+                console.error('删除音频文件失败:', fileName, err);
+            }
+        }
+
+        // 清理旧的文件句柄存储（兼容旧版本）
+        async function cleanupOldFileHandles() {
+            if (!db) return;
+
+            try {
+                const transaction = db.transaction(['fileHandles'], 'readwrite');
+                const store = transaction.objectStore('fileHandles');
+
+                // 清空旧的 fileHandles 存储
+                await new Promise((resolve, reject) => {
+                    const request = store.clear();
+                    request.onsuccess = resolve;
+                    request.onerror = reject;
+                });
+            } catch (err) {
+                console.warn('清理旧文件句柄失败:', err);
+            }
+        }
+
+        // 保存播放列表到 localStorage
+        async function savePlaylistToStorage() {
+            try {
+                if (!window.localStorage) {
+                    console.warn('浏览器不支持 localStorage');
+                    return;
+                }
+                const playlistData = playlist.map(item => ({
+                    name: item.name
+                }));
+                localStorage.setItem(PLAYLIST_STORAGE_KEY, JSON.stringify(playlistData));
+                console.log('播放列表已保存到本地存储:', playlistData.length, '首歌曲');
+
+                // 保存所有音频文件到 IndexedDB
+                for (const item of playlist) {
+                    if (item.file) {
+                        await saveAudioFileToIndexedDB(item.file);
+                    }
+                }
+            } catch (err) {
+                console.error('保存播放列表失败:', err);
+            }
+        }
+
+        // 从 localStorage 加载播放列表
+        async function loadPlaylistFromStorage() {
+            try {
+                if (!window.localStorage) {
+                    console.warn('浏览器不支持 localStorage');
+                    return;
+                }
+                const stored = localStorage.getItem(PLAYLIST_STORAGE_KEY);
+                console.log('从 localStorage 读取:', stored);
+                if (stored && stored !== 'null' && stored !== 'undefined') {
+                    const playlistData = JSON.parse(stored);
+                    if (Array.isArray(playlistData) && playlistData.length > 0) {
+                        playlist = [];
+                        for (const item of playlistData) {
+                            // 尝试从 IndexedDB 恢复文件
+                            const file = await loadAudioFileFromIndexedDB(item.name);
+                            playlist.push({
+                                name: item.name,
+                                file: file,  // 可能为 null（如果文件未保存或已被删除）
+                                fileHandle: null
+                            });
+                        }
+                        console.log('播放列表已从本地存储恢复:', playlist.length, '首歌曲');
+
+                        // 清理旧的文件句柄存储
+                        await cleanupOldFileHandles();
+                        updatePlaylistUI();
+                    }
+                }
+            } catch (err) {
+                console.error('加载播放列表失败:', err);
+            }
+        }
+        
+        async function handlePlaylistDrop(files) {
+            const audioFiles = Array.from(files).filter(file => file.type.startsWith('audio/'));
+
+            if (audioFiles.length === 0) {
+                alert('请拖放音频文件');
+                return;
+            }
+
+            // 尝试使用 File System Access API 获取文件句柄
+            for (const file of audioFiles) {
+                const item = {
+                    name: file.name,
+                    file: file,
+                    fileHandle: null
+                };
+
+                // 如果支持 File System Access API，尝试获取句柄
+                if (window.showOpenFilePicker && file.handle) {
+                    item.fileHandle = file.handle;
+                }
+
+                playlist.push(item);
+            }
+
+            updatePlaylistUI();
+            await savePlaylistToStorage();  // 保存到本地存储
+
+            // 如果是第一首歌，自动播放
+            if (playlist.length === audioFiles.length && playlist.length > 0) {
+                try {
+                    await playTrack(0);
+                } catch (err) {
+                    console.error('自动播放失败:', err);
+                }
+            }
+        }
+        
+        function updatePlaylistUI() {
+            const playlistItems = document.getElementById('playlistItems');
+            const playlistCount = document.getElementById('playlistCount');
+            const playlistEmpty = document.getElementById('playlistEmpty');
+            
+            if (playlistCount) playlistCount.textContent = playlist.length;
+            
+            if (playlist.length === 0) {
+                if (playlistItems) playlistItems.innerHTML = '';
+                if (playlistEmpty) playlistEmpty.style.display = 'block';
+                return;
+            }
+            
+            if (playlistEmpty) playlistEmpty.style.display = 'none';
+            
+            if (playlistItems) {
+                playlistItems.innerHTML = playlist.map((item, index) => `
+                    <div class="playlistItem ${index === currentTrackIndex ? 'playing' : ''}" data-index="${index}">
+                        <span class="playlistItemIndex">${index + 1}</span>
+                        <span class="playlistItemName">${item.name}</span>
+                        <span class="playlistItemRemove" data-remove="${index}">×</span>
+                    </div>
+                `).join('');
+                
+                // 双击播放
+                playlistItems.querySelectorAll('.playlistItem').forEach(item => {
+                    item.addEventListener('dblclick', async () => {
+                        const index = parseInt(item.dataset.index);
+                        try {
+                            await playTrack(index);
+                        } catch (err) {
+                            console.error('播放失败:', err);
+                        }
+                    });
+                });
+                
+                // 删除按钮
+                playlistItems.querySelectorAll('.playlistItemRemove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const index = parseInt(btn.dataset.remove);
+                        removeTrack(index);
+                    });
+                });
+            }
+        }
+        
+        async function playTrack(index) {
+            console.log('开始播放歌曲, 索引:', index);
+            if (index < 0 || index >= playlist.length) {
+                console.log('索引无效');
+                return;
+            }
+
+            currentTrackIndex = index;
+            const track = playlist[index];
+            console.log('播放歌曲:', track.name, 'file:', !!track.file, 'fileHandle:', !!track.fileHandle);
+
+            // 停止当前播放
+            stopAudio();
+
+            let fileToPlay = track.file;
+
+            // 如果没有文件但有 fileHandle，尝试通过句柄获取文件
+            if (!fileToPlay && track.fileHandle) {
+                console.log('尝试通过 fileHandle 获取文件');
+                try {
+                    // 请求权限（用户可能需要再次授权）
+                    if (track.fileHandle.requestPermission) {
+                        console.log('请求文件权限...');
+                        const permission = await track.fileHandle.requestPermission({ mode: 'read' });
+                        console.log('权限结果:', permission);
+                        if (permission !== 'granted') {
+                            alert('需要文件访问权限才能播放：' + track.name);
+                            return;
+                        }
+                    }
+                    fileToPlay = await track.fileHandle.getFile();
+                    console.log('通过句柄获取文件成功:', fileToPlay.name);
+                    // 更新缓存的文件对象
+                    track.file = fileToPlay;
+                } catch (err) {
+                    console.error('通过句柄获取文件失败:', err);
+                    alert('无法访问文件：' + track.name + '\n\n文件可能已被移动或删除。');
+                    return;
+                }
+            }
+
+            // 检查文件是否存在
+            if (!fileToPlay) {
+                console.log('没有可播放的文件');
+                alert('歌曲文件需要重新选择：' + track.name + '\n\n请通过"选择音乐"按钮或拖放文件重新添加该歌曲。');
+                return;
+            }
+
+            console.log('开始读取文件:', fileToPlay.name);
+            // 读取并播放文件
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                console.log('文件读取完成');
+                try {
+                    await initAudio();
+                    const arrayBuffer = e.target.result;
+                    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                    currentTrackName = track.name;
+                    document.getElementById('trackInfo').textContent = '🎵 ' + track.name;
+
+                    playBuffer(audioBuffer, 0);
+                    updatePlaylistUI();
+                } catch (err) {
+                    console.error('加载音频失败:', err);
+                    alert('加载音频失败: ' + err.message);
+                }
+            };
+            reader.onerror = (err) => {
+                console.error('FileReader 错误:', err);
+            };
+            reader.readAsArrayBuffer(fileToPlay);
+        }
+        
+        async function removeTrack(index) {
+            const track = playlist[index];
+
+            // 如果删除的是当前播放的歌曲
+            if (index === currentTrackIndex) {
+                stopAudio();
+                currentTrackIndex = -1;
+            } else if (index < currentTrackIndex) {
+                currentTrackIndex--;
+            }
+
+            // 从 IndexedDB 删除音频文件
+            if (track) {
+                await deleteAudioFileFromIndexedDB(track.name);
+            }
+
+            playlist.splice(index, 1);
+            updatePlaylistUI();
+            await savePlaylistToStorage();  // 保存到本地存储
+        }
+
+        // 清空播放列表
+        async function clearPlaylist() {
+            if (playlist.length === 0) {
+                return;
+            }
+
+            // 停止当前播放
+            stopAudio();
+            currentTrackIndex = -1;
+
+            // 删除所有音频文件
+            for (const track of playlist) {
+                await deleteAudioFileFromIndexedDB(track.name);
+            }
+
+            // 清空播放列表
+            playlist = [];
+
+            // 清空 localStorage
+            localStorage.removeItem(PLAYLIST_STORAGE_KEY);
+
+            // 更新UI
+            updatePlaylistUI();
+
+            console.log('播放列表已清空');
+        }
+
+        // 切换播放模式
+        function togglePlayMode() {
+            const modes = [PLAY_MODES.SEQUENTIAL, PLAY_MODES.LOOP, PLAY_MODES.RANDOM];
+            const modeNames = {
+                [PLAY_MODES.SEQUENTIAL]: '顺序播放',
+                [PLAY_MODES.LOOP]: '列表循环',
+                [PLAY_MODES.RANDOM]: '随机播放'
+            };
+
+            // 切换到下一个模式
+            const currentIndex = modes.indexOf(currentPlayMode);
+            currentPlayMode = modes[(currentIndex + 1) % modes.length];
+
+            // 更新按钮显示
+            const playModeBtn = document.getElementById('playModeBtn');
+            if (playModeBtn) {
+                playModeBtn.textContent = modeNames[currentPlayMode];
+            }
+
+            console.log('播放模式切换为:', modeNames[currentPlayMode]);
+        }
+
+        // 处理歌曲结束，根据播放模式决定下一首
+        async function handleTrackEnd() {
+            if (playlist.length === 0) {
+                console.log('播放列表为空，不自动播放');
+                return;
+            }
+
+            let nextIndex;
+
+            switch (currentPlayMode) {
+                case PLAY_MODES.SEQUENTIAL:
+                    // 顺序播放：下一首，到末尾停止
+                    nextIndex = currentTrackIndex + 1;
+                    if (nextIndex >= playlist.length) {
+                        console.log('顺序播放：已到列表末尾，停止播放');
+                        return;
+                    }
+                    break;
+
+                case PLAY_MODES.LOOP:
+                    // 列表循环：下一首，到末尾回到第一首
+                    nextIndex = (currentTrackIndex + 1) % playlist.length;
+                    break;
+
+                case PLAY_MODES.RANDOM:
+                    // 随机播放：随机选择一首（不重复当前）
+                    if (playlist.length === 1) {
+                        nextIndex = 0;
+                    } else {
+                        do {
+                            nextIndex = Math.floor(Math.random() * playlist.length);
+                        } while (nextIndex === currentTrackIndex);
+                    }
+                    break;
+
+                default:
+                    nextIndex = currentTrackIndex + 1;
+                    if (nextIndex >= playlist.length) return;
+            }
+
+            console.log('自动播放下一首，索引:', nextIndex, '模式:', currentPlayMode);
+            try {
+                await playTrack(nextIndex);
+            } catch (err) {
+                console.error('自动播放下一首失败:', err);
+            }
+        }
+
+        function initProgressBar() {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const progressHandle = document.getElementById('progressHandle');
+            
+            if (!progressBar) return;
+            
+            // 点击进度条跳转
+            progressBar.addEventListener('click', (e) => {
+                if (!audioBuffer || isDraggingProgress) return;
+                
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                seekTo(percent);
+            });
+            
+            // 拖拽功能
+            progressHandle.addEventListener('mousedown', (e) => {
+                if (!audioBuffer) return;
+                isDraggingProgress = true;
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDraggingProgress || !audioBuffer) return;
+                
+                const rect = progressBar.getBoundingClientRect();
+                let percent = (e.clientX - rect.left) / rect.width;
+                percent = Math.max(0, Math.min(1, percent));
+                
+                updateProgressUI(percent);
+            });
+            
+            document.addEventListener('mouseup', (e) => {
+                if (isDraggingProgress && audioBuffer) {
+                    const rect = progressBar.getBoundingClientRect();
+                    let percent = (e.clientX - rect.left) / rect.width;
+                    percent = Math.max(0, Math.min(1, percent));
+                    seekTo(percent);
+                }
+                isDraggingProgress = false;
+            });
+        }
+        
+        function updateProgressUI(percent) {
+            const progressFill = document.getElementById('progressFill');
+            const progressHandle = document.getElementById('progressHandle');
+            
+            if (progressFill) progressFill.style.width = (percent * 100) + '%';
+            if (progressHandle) progressHandle.style.left = (percent * 100) + '%';
+        }
+        
+        function updateTimeDisplay(current, total) {
+            const timeDisplay = document.getElementById('timeDisplay');
+            if (timeDisplay) {
+                timeDisplay.textContent = formatTime(current) + ' / ' + formatTime(total);
+            }
+        }
+        
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+        
+        function seekTo(percent) {
+            if (!audioBuffer) return;
+            
+            const wasPlaying = isPlaying;
+            pauseTime = percent * audioBuffer.duration;
+            
+            // 停止当前播放
+            if (source) {
+                try {
+                    isManualStop = true;  // 标记为手动停止
+                    source.onended = null; // 移除ended事件，防止触发重置
+                    source.stop(0);
+                    source.disconnect();
+                } catch (e) {}
+            }
+            
+            // 更新UI
+            updateProgressUI(percent);
+            updateTimeDisplay(pauseTime, audioBuffer.duration);
+            
+            // 如果之前在播放，继续播放
+            if (wasPlaying) {
+                isPlaying = false; // 先重置，让playBuffer正确设置
+                playBuffer(audioBuffer, pauseTime);
+            } else {
+                // 暂停状态，保持暂停
+                isPlaying = false;
+                isPaused = true;
+            }
+        }
+        
+        function resizeCanvas() {
+            if (!canvas || !offscreenCanvas) return;
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            offscreenCanvas.width = canvas.width;
+            offscreenCanvas.height = canvas.height;
+            
+            // 重新计算频谱柱位置
+            initBarCache();
+        }
+        
+        // ========== 粒子池初始化 ==========
+        function initParticlePool() {
+            for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+                particlePool.push({
+                    x: 0,
+                    y: 0,
+                    vx: 0,
+                    vy: 0,
+                    size: 0,
+                    alpha: 0,
+                    life: 0,
+                    maxLife: 0,
+                    hue: 0,
+                    type: 'circle',  // 粒子类型: circle, star, heart, note, diamond, sparkle
+                    active: false
+                });
+            }
+        }
+        
+        // ========== 颜色表初始化 ==========
+        function initColorTable() {
+            for (let i = 0; i < 256; i++) {
+                // HSL to RGB 预计算
+                const hue = (i / 255) * 360;
+                colorTable[i] = hue;
+            }
+        }
+        
+        // ========== 频谱柱缓存初始化 ==========
+        function initBarCache() {
+            const barWidth = canvas.width / BAR_COUNT;
+            for (let i = 0; i < BAR_COUNT; i++) {
+                barCache.widths[i] = barWidth * 0.8;
+                barCache.positions[i] = i * barWidth + barWidth * 0.1;
+            }
+        }
+        
+        // ========== 音频初始化 ==========
+        async function initAudio() {
+            console.log('初始化音频...');
+            
+            if (!audioContext) {
+                console.log('创建新的 AudioContext');
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) {
+                    throw new Error('浏览器不支持 Web Audio API');
+                }
+                
+                audioContext = new AudioContextClass();
+                console.log('AudioContext 创建成功，初始状态:', audioContext.state);
+                
+                // 创建分析器 - 只创建一次，永不重建
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = FFT_SIZE;
+                analyser.smoothingTimeConstant = 0.85;
+                console.log('Analyser 创建成功');
+            } else {
+                console.log('使用已存在的 AudioContext，状态:', audioContext.state);
+            }
+            
+            // 如果音频上下文被挂起，尝试恢复
+            if (audioContext.state === 'suspended') {
+                console.log('尝试恢复音频上下文...');
+                await audioContext.resume();
+                console.log('音频上下文已恢复，新状态:', audioContext.state);
+            }
+            
+            return audioContext;
+        }
+        
+        // ========== 文件选择处理 ==========
+        async function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) {
+                console.log('没有选择文件');
+                return;
+            }
+
+            // 添加到播放列表
+            for (const file of files) {
+                if (file.type.startsWith('audio/')) {
+                    const item = {
+                        name: file.name,
+                        file: file,
+                        fileHandle: null
+                    };
+
+                    // 如果支持 File System Access API，尝试获取句柄
+                    if (window.showOpenFilePicker && file.handle) {
+                        item.fileHandle = file.handle;
+                    }
+
+                    playlist.push(item);
+                }
+            }
+
+            updatePlaylistUI();
+            await savePlaylistToStorage();  // 保存到本地存储
+
+            // 如果当前没有播放，播放第一首
+            if (!isPlaying && playlist.length > 0) {
+                try {
+                    await playTrack(playlist.length - files.length);
+                } catch (err) {
+                    console.error('自动播放失败:', err);
+                }
+            }
+        }
+
+        // ========== 麦克风输入 ==========
+        async function handleMicInput() {
+            try {
+                await initAudio();
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                if (source) {
+                    try {
+                        if (source.stop) source.stop(0);
+                        source.disconnect();
+                    } catch (e) {}
+                }
+                
+                source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                isPlaying = true;
+            } catch (err) {
+                alert('无法访问麦克风: ' + err.message);
+            }
+        }
+        
+        // ========== 播放音频Buffer ==========
+        function playBuffer(buffer, offset = 0) {
+            console.log('开始播放音频，时长:', buffer.duration, '偏移:', offset);
+            
+            // 停止之前的播放
+            if (source) {
+                try {
+                    isManualStop = true;  // 标记为手动停止
+                    if (source.stop) {
+                        source.stop(0);
+                    }
+                    source.disconnect();
+                    console.log('已停止之前的播放');
+                } catch (e) {
+                    // 忽略已停止的节点错误
+                }
+            }
+            
+            try {
+                source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                source.start(0, offset);
+                isPlaying = true;
+                isPaused = false;
+                startTime = audioContext.currentTime - offset;
+                console.log('音频播放已开始');
+                
+                source.onended = function() {
+                    console.log('音频播放结束');
+                    isPlaying = false;
+                    isPaused = false;
+                    updatePlayPauseButton(false);
+                    updateProgressUI(0);
+                    // 使用 buffer 参数避免 audioBuffer 被清空后访问 null
+                    updateTimeDisplay(0, buffer ? buffer.duration : 0);
+
+                    // 只有自然结束（非手动停止）时才自动播放下一首
+                    if (!isManualStop) {
+                        handleTrackEnd();
+                    }
+                    // 重置标志
+                    isManualStop = false;
+                };
+
+                // 更新播放按钮状态
+                updatePlayPauseButton(true);
+
+                // 更新进度条
+                audioDuration = buffer.duration;
+                updateTimeDisplay(offset, audioDuration);
+            } catch (err) {
+                console.error('播放失败:', err);
+                alert('播放失败: ' + err.message);
+            }
+        }
+        
+        // ========== 暂停/播放切换 ==========
+        function togglePlayPause() {
+            if (!audioBuffer) {
+                console.log('没有可播放的音频');
+                return;
+            }
+            
+            if (isPlaying && !isPaused) {
+                // 暂停
+                pauseTime = audioContext.currentTime - startTime;
+                if (source) {
+                    try {
+                        isManualStop = true;  // 标记为手动停止
+                        source.stop(0);
+                        source.disconnect();
+                    } catch (e) {}
+                }
+                isPaused = true;
+                isPlaying = false;
+                updatePlayPauseButton(false);
+                console.log('音频已暂停，时间:', pauseTime);
+            } else {
+                // 恢复播放
+                playBuffer(audioBuffer, pauseTime);
+                updatePlayPauseButton(true);
+                console.log('音频已恢复');
+            }
+        }
+        
+        // ========== 重置音频 ==========
+        function stopAudio() {
+            console.log('停止音频');
+
+            // 停止所有音源
+            if (source) {
+                try {
+                    isManualStop = true;  // 标记为手动停止
+                    if (source.stop) source.stop(0);
+                    source.disconnect();
+                } catch (e) {}
+            }
+
+            isPlaying = false;
+            isPaused = false;
+            pauseTime = 0;
+            
+            // 只有在有音频文件时才重置音频buffer
+            if (audioBuffer) {
+                audioBuffer = null;
+                currentTrackName = '';
+                audioDuration = 0;
+                document.getElementById('trackInfo').textContent = '未播放';
+                updateProgressUI(0);
+                updateTimeDisplay(0, 0);
+                // 清空文件输入
+                document.getElementById('fileInput').value = '';
+            }
+            
+            updatePlayPauseButton(false);
+            
+            console.log('音频已停止');
+        }
+        
+        // ========== 更新播放按钮状态 ==========
+        function updatePlayPauseButton(playing) {
+            const btn = document.getElementById('playPauseBtn');
+            if (playing) {
+                btn.disabled = false;
+                btn.innerHTML = '⏸️ 暂停';
+                btn.classList.remove('paused');
+            } else {
+                if (audioBuffer) {
+                    btn.disabled = false;
+                    btn.innerHTML = '▶️ 播放';
+                    btn.classList.add('paused');
+                } else {
+                    btn.disabled = true;
+                    btn.innerHTML = '▶️ 播放';
+                    btn.classList.remove('paused');
+                }
+            }
+        }
+        
+        // ========== 获取粒子 ==========
+        function getParticle() {
+            for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+                if (!particlePool[i].active) {
+                    particlePool[i].active = true;
+                    return particlePool[i];
+                }
+            }
+            return null;
+        }
+        
+        // ========== 释放粒子 ==========
+        function releaseParticle(particle) {
+            particle.active = false;
+        }
+        
+        // ========== 重音检测算法 ==========
+        function detectBeat(bassEnergy) {
+            const energyFactor = bassEnergy / 255;
+
+            // 更新能量历史缓冲区
+            energyHistorySum -= energyHistory[energyHistoryIndex];
+            energyHistory[energyHistoryIndex] = energyFactor;
+            energyHistorySum += energyFactor;
+            energyHistoryIndex = (energyHistoryIndex + 1) % ENERGY_HISTORY_SIZE;
+            beatFrameCount++;
+
+            // 检查缓冲区是否已填满
+            if (!energyHistoryFilled && beatFrameCount >= ENERGY_HISTORY_SIZE) {
+                energyHistoryFilled = true;
+            }
+
+            // 如果缓冲区未填满，使用简单的阈值检测
+            if (!energyHistoryFilled) {
+                // 初始化阶段：使用固定阈值
+                const INITIAL_THRESHOLD = 0.4;
+                if (energyFactor > INITIAL_THRESHOLD && energyFactor > lastPeakEnergy * 0.9) {
+                    lastPeakEnergy = energyFactor;
+                    beatDetected = true;
+                    return true;
+                }
+                lastPeakEnergy = Math.max(lastPeakEnergy * peakDecayFactor, energyFactor);
+                return false;
+            }
+
+            // 计算平均能量
+            const avgEnergy = energyHistorySum / ENERGY_HISTORY_SIZE;
+
+            // 峰值衰减（只衰减，不低于平均值，但检测时放宽）
+            lastPeakEnergy = lastPeakEnergy * peakDecayFactor;
+
+            // 重音检测条件：
+            // 1. 当前能量 > 平均能量 × 1（突增检测）
+            // 2. 当前能量 > 上次峰值 × 0.5（允许峰值自然衰减后触发）
+            // 3. 当前能量 > 0.2（基础阈值，过滤静音）
+            const isSignificantPeak = energyFactor > avgEnergy * 1;
+            const isAboveLastPeak = energyFactor > lastPeakEnergy * 0.5;
+            const isAboveBaseThreshold = energyFactor > 0.2;
+
+            // 如果检测到重音，更新峰值
+            if (isSignificantPeak && isAboveLastPeak && isAboveBaseThreshold) {
+                lastPeakEnergy = energyFactor;
+                beatDetected = true; // 设置重音检测标志（用于可视化）
+                return true;
+            }
+
+            return false;
+        }
+
+        // ========== 生成粒子 ==========
+        function spawnParticles(bassEnergy, currentTime) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // 使用重音检测算法
+            const isBeat = detectBeat(bassEnergy);
+
+            // 如果不是重音，不生成粒子
+            if (!isBeat) {
+                return;
+            }
+
+            // 检查冷却时间（防止连续重音时粒子过多）
+            if (currentTime - lastParticleSpawnTime < PARTICLE_SPAWN_COOLDOWN) {
+                return;
+            }
+            lastParticleSpawnTime = currentTime;
+
+            // 计算能量因子 (0-1)
+            const energyFactor = bassEnergy / 255;
+
+            // 超过阈值后，生成固定数量（4倍）
+            const spawnCount = particleSpawnMultiplier * 4; // 滑块值×4=生成数量
+            const maxSpawn = Math.min(spawnCount, particleSpawnMultiplier * 4); // 滑块值×4=最大粒子数
+
+            // 获取启用的粒子类型
+            const enabledTypes = Object.keys(particleEffects).filter(type => particleEffects[type].enabled);
+            if (enabledTypes.length === 0) return;
+
+            for (let i = 0; i < maxSpawn; i++) {
+                const p = getParticle();
+                if (!p) break;
+
+                // 随机选择一种启用的粒子类型
+                p.type = enabledTypes[Math.floor(Math.random() * enabledTypes.length)];
+
+                // 随机角度，但偏向水平方向散开（让粒子更分散）
+                const angle = Math.random() * Math.PI * 3;
+
+                // 速度根据音乐能量动态变化（更大的差异）
+                // 低能量: 速度 2-4（较慢）
+                // 高能量: 速度 6-12（很快）
+                const baseSpeed = 2 + Math.random() * 1.5;
+                const energyBoost = energyFactor * 8; // 能量加成最高 +6
+                const speed = baseSpeed + energyBoost;
+
+                // 生成位置：从中心向外扩散
+                const spawnRadius = 30 + Math.random() * 40;
+                const spawnAngle = Math.random() * Math.PI * 3;
+                p.x = centerX + Math.cos(spawnAngle) * spawnRadius;
+                p.y = centerY + Math.sin(spawnAngle) * spawnRadius;
+
+                // 速度方向：从中心向外
+                const velocityAngle = Math.atan2(p.y - centerY, p.x - centerX);
+                const spread = (Math.random() - 0.5) * 0.5; // 添加一些随机扩散
+                p.vx = Math.cos(velocityAngle + spread) * speed;
+                p.vy = Math.sin(velocityAngle + spread) * speed;
+
+                // 粒子大小随能量变化（调大到120%）
+                const baseSize = (2 + Math.random() * 3) * 2;
+                const sizeBoost = energyFactor * 4 * 2;
+                p.size = baseSize + sizeBoost;
+
+                // 透明度
+                p.alpha = 0.7 + Math.random() * 0.3;
+
+                p.life = 0;
+
+                // 生命周期（高能量时粒子飞得更远，存活更久）
+                const baseLife = 30 + Math.random() * 20;
+                const lifeBoost = energyFactor * 30;
+                p.maxLife = baseLife + lifeBoost;
+
+                p.hue = energyFactor * 60 + Math.random() * 60;
+
+                // 存储能量因子用于后续更新
+                p.energyFactor = energyFactor;
+            }
+        }
+        
+        // ========== 更新粒子 ==========
+        function updateParticles(currentBassEnergy) {
+            // 计算当前能量因子
+            const currentEnergyFactor = currentBassEnergy ? currentBassEnergy / 255 : 0;
+
+            for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+                const p = particlePool[i];
+                if (!p.active) continue;
+
+                // 空气阻力（更小的阻力让粒子飞得更远）
+                p.vx *= 0.985;
+                p.vy *= 0.985;
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                // 重力（更轻）
+                p.vy += 0.05;
+
+                p.life++;
+
+                // 透明度随生命周期变化
+                p.alpha = 1 - (p.life / p.maxLife);
+
+                if (p.life >= p.maxLife || p.x < 0 || p.x > canvas.width || p.y > canvas.height) {
+                    releaseParticle(p);
+                }
+            }
+        }
+        
+        // ========== 绘制粒子 ==========
+        function drawParticles() {
+            ctx.save();
+
+            for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+                const p = particlePool[i];
+                if (!p.active) continue;
+
+                // 发光效果
+                ctx.shadowBlur = GLOW_INTENSITY;
+                ctx.shadowColor = `hsla(${p.hue}, 100%, 50%, ${p.alpha})`;
+                ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.alpha})`;
+
+                // 根据粒子类型绘制不同形状
+                switch (p.type) {
+                    case 'circle':
+                        drawCircleParticle(p);
+                        break;
+                    case 'star':
+                        drawStarParticle(p);
+                        break;
+                    case 'heart':
+                        drawHeartParticle(p);
+                        break;
+                    case 'note':
+                        drawNoteParticle(p);
+                        break;
+                    case 'diamond':
+                        drawDiamondParticle(p);
+                        break;
+                    case 'sparkle':
+                        drawSparkleParticle(p);
+                        break;
+                    default:
+                        drawCircleParticle(p);
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // 绘制圆形粒子
+        function drawCircleParticle(p) {
+            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+            gradient.addColorStop(0, `hsla(${p.hue}, 100%, 70%, ${p.alpha})`);
+            gradient.addColorStop(1, `hsla(${p.hue}, 100%, 50%, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 绘制星星粒子
+        function drawStarParticle(p) {
+            const spikes = 5;
+            const outerRadius = p.size;
+            const innerRadius = p.size * 0.4;
+            let rot = Math.PI / 2 * 3;
+            let x = p.x;
+            let y = p.y;
+            const step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = p.x + Math.cos(rot) * outerRadius;
+                y = p.y + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = p.x + Math.cos(rot) * innerRadius;
+                y = p.y + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(p.x, p.y - outerRadius);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // 绘制心形粒子
+        function drawHeartParticle(p) {
+            const size = p.size;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y + size * 0.3);
+            ctx.bezierCurveTo(
+                p.x - size * 0.5, p.y - size * 0.3,
+                p.x - size, p.y + size * 0.2,
+                p.x, p.y + size
+            );
+            ctx.bezierCurveTo(
+                p.x + size, p.y + size * 0.2,
+                p.x + size * 0.5, p.y - size * 0.3,
+                p.x, p.y + size * 0.3
+            );
+            ctx.fill();
+        }
+
+        // 绘制音符粒子
+        function drawNoteParticle(p) {
+            const size = p.size;
+            ctx.beginPath();
+            // 音符头部（椭圆）
+            ctx.ellipse(p.x - size * 0.3, p.y + size * 0.5, size * 0.4, size * 0.3, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+            // 音符符干
+            ctx.fillRect(p.x + size * 0.1, p.y - size * 0.8, size * 0.15, size * 1.3);
+            // 音符符尾
+            ctx.beginPath();
+            ctx.moveTo(p.x + size * 0.25, p.y - size * 0.8);
+            ctx.quadraticCurveTo(p.x + size * 0.8, p.y - size * 0.5, p.x + size * 0.6, p.y - size * 0.2);
+            ctx.quadraticCurveTo(p.x + size * 0.5, p.y - size * 0.5, p.x + size * 0.25, p.y - size * 0.5);
+            ctx.fill();
+        }
+
+        // 绘制钻石粒子
+        function drawDiamondParticle(p) {
+            const size = p.size;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y - size);
+            ctx.lineTo(p.x + size * 0.8, p.y);
+            ctx.lineTo(p.x, p.y + size);
+            ctx.lineTo(p.x - size * 0.8, p.y);
+            ctx.closePath();
+            ctx.fill();
+            // 内部高光
+            ctx.fillStyle = `hsla(${p.hue}, 100%, 90%, ${p.alpha * 0.5})`;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y - size * 0.5);
+            ctx.lineTo(p.x + size * 0.3, p.y);
+            ctx.lineTo(p.x, p.y + size * 0.3);
+            ctx.lineTo(p.x - size * 0.3, p.y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // 绘制闪光粒子
+        function drawSparkleParticle(p) {
+            const size = p.size * 1.5;
+            const rot = p.life * 0.1; // 旋转动画
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(rot);
+
+            // 十字光芒
+            ctx.beginPath();
+            ctx.moveTo(0, -size);
+            ctx.lineTo(size * 0.2, -size * 0.2);
+            ctx.lineTo(size, 0);
+            ctx.lineTo(size * 0.2, size * 0.2);
+            ctx.lineTo(0, size);
+            ctx.lineTo(-size * 0.2, size * 0.2);
+            ctx.lineTo(-size, 0);
+            ctx.lineTo(-size * 0.2, -size * 0.2);
+            ctx.closePath();
+            ctx.fill();
+
+            // 中心点
+            ctx.fillStyle = `hsla(${p.hue}, 100%, 95%, ${p.alpha})`;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+        
+        // ========== 绘制频谱柱状图 ==========
+        function drawSpectrum() {
+            const barWidth = canvas.width / BAR_COUNT;
+            const centerY = canvas.height / 2;
+            
+            // 更新频谱历史数据
+            for (let i = TRAIL_LENGTH - 1; i > 0; i--) {
+                spectrumHistory[i].set(spectrumHistory[i - 1]);
+            }
+            for (let i = 0; i < BAR_COUNT; i++) {
+                const dataIndex = Math.floor((i / BAR_COUNT) * targetSpectrumLength);
+                spectrumHistory[0][i] = spectrumData[dataIndex];
+            }
+            
+            ctx.save();
+            
+            // 绘制拖尾效果
+            for (let trail = TRAIL_LENGTH - 1; trail >= 0; trail--) {
+                const trailAlpha = 1 - (trail / TRAIL_LENGTH) * 0.7;
+                const trailOffset = trail * 3;
+                
+                for (let i = 0; i < BAR_COUNT; i++) {
+                    const value = spectrumHistory[trail][i];
+                    const barHeight = (value / 255) * (canvas.height * 0.4);
+                    
+                    if (barHeight < 2) continue;
+                    
+                    const x = i * barWidth + barWidth * 0.1;
+                    const hue = (i / BAR_COUNT) * 360 + (value / 255) * 60;
+                    
+                    // 增强发光效果
+                    ctx.shadowBlur = GLOW_INTENSITY + (trail === 0 ? 10 : 0);
+                    ctx.shadowColor = `hsla(${hue}, 100%, 50%, ${0.8 * trailAlpha})`;
+                    
+                    // 上柱
+                    const gradient1 = ctx.createLinearGradient(0, centerY - barHeight - trailOffset, 0, centerY);
+                    gradient1.addColorStop(0, `hsla(${hue}, 100%, 80%, ${0.9 * trailAlpha})`);
+                    gradient1.addColorStop(0.5, `hsla(${hue}, 100%, 60%, ${0.6 * trailAlpha})`);
+                    gradient1.addColorStop(1, `hsla(${hue}, 100%, 50%, ${0.2 * trailAlpha})`);
+                    
+                    ctx.fillStyle = gradient1;
+                    ctx.fillRect(x, centerY - barHeight - trailOffset, barWidth * 0.8, barHeight);
+                    
+                    // 下柱 (镜像)
+                    const gradient2 = ctx.createLinearGradient(0, centerY, 0, centerY + barHeight + trailOffset);
+                    gradient2.addColorStop(0, `hsla(${hue}, 100%, 50%, ${0.2 * trailAlpha})`);
+                    gradient2.addColorStop(0.5, `hsla(${hue}, 100%, 60%, ${0.6 * trailAlpha})`);
+                    gradient2.addColorStop(1, `hsla(${hue}, 100%, 80%, ${0.9 * trailAlpha})`);
+                    
+                    ctx.fillStyle = gradient2;
+                    ctx.fillRect(x, centerY + trailOffset, barWidth * 0.8, barHeight);
+                }
+            }
+            
+            ctx.restore();
+        }
+        
+        // ========== 绘制波形图 ==========
+        function drawWaveform() {
+            const sliceWidth = canvas.width / targetSpectrumLength;
+            const centerY = canvas.height / 2;
+            
+            ctx.save();
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = GLOW_INTENSITY + 10;
+            ctx.shadowColor = 'rgba(0, 255, 200, 0.9)';
+            
+            // 上波形
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(0, 255, 220, 1)';
+            
+            for (let i = 0; i < targetSpectrumLength; i++) {
+                const v = waveformData[i] / 128.0;
+                const y = centerY - (v - 1) * (canvas.height * 0.15);
+                const x = i * sliceWidth;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // 下波形 (镜像)
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255, 50, 220, 1)';
+            ctx.shadowColor = 'rgba(255, 50, 220, 0.9)';
+            
+            for (let i = 0; i < targetSpectrumLength; i++) {
+                const v = waveformData[i] / 128.0;
+                const y = centerY + (v - 1) * (canvas.height * 0.15);
+                const x = i * sliceWidth;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        // ========== 绘制圆形频谱 ==========
+        function drawCircularSpectrum() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const baseRadius = Math.min(canvas.width, canvas.height) * 0.15;
+            
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(rotationAngle);
+            
+            for (let i = 0; i < CIRCLE_BARS; i++) {
+                const angle = (i / CIRCLE_BARS) * Math.PI * 2;
+                const dataIndex = Math.floor((i / CIRCLE_BARS) * targetSpectrumLength);
+                const value = spectrumData[dataIndex];
+                const barHeight = (value / 255) * 150;
+                
+                if (barHeight < 2) continue;
+                
+                const hue = (i / CIRCLE_BARS) * 360 + rotationAngle * 50;
+                
+                ctx.save();
+                ctx.rotate(angle);
+                
+                // 增强发光效果
+                ctx.shadowBlur = GLOW_INTENSITY + 5;
+                ctx.shadowColor = `hsla(${hue}, 100%, 60%, 0.9)`;
+                
+                // 外圈条
+                const gradient = ctx.createLinearGradient(0, baseRadius, 0, baseRadius + barHeight);
+                gradient.addColorStop(0, `hsla(${hue}, 100%, 70%, 1)`);
+                gradient.addColorStop(0.5, `hsla(${hue}, 100%, 50%, 0.8)`);
+                gradient.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(-4, baseRadius, 8, barHeight);
+                
+                // 内圈条 (反向)
+                const gradient2 = ctx.createLinearGradient(0, -baseRadius, 0, -baseRadius - barHeight * 0.5);
+                gradient2.addColorStop(0, `hsla(${hue}, 100%, 70%, 1)`);
+                gradient2.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
+                
+                ctx.fillStyle = gradient2;
+                ctx.fillRect(-3, -baseRadius - barHeight * 0.5, 6, barHeight * 0.5);
+                
+                ctx.restore();
+            }
+            
+            // 中心圆环 - 脉冲效果
+            const pulseScale = 1 + Math.sin(rotationAngle * 5) * 0.1;
+            ctx.beginPath();
+            ctx.arc(0, 0, baseRadius * 0.8 * pulseScale, 0, Math.PI * 2);
+            ctx.strokeStyle = `hsla(${rotationAngle * 100}, 100%, 60%, 0.8)`;
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = GLOW_INTENSITY + 15;
+            ctx.shadowColor = `hsla(${rotationAngle * 100}, 100%, 50%, 1)`;
+            ctx.stroke();
+            
+            // 内圈小圆
+            ctx.beginPath();
+            ctx.arc(0, 0, baseRadius * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${rotationAngle * 100 + 180}, 100%, 50%, 0.3)`;
+            ctx.shadowBlur = GLOW_INTENSITY;
+            ctx.shadowColor = `hsla(${rotationAngle * 100 + 180}, 100%, 50%, 0.8)`;
+            ctx.fill();
+
+            // 重音指示器 - 检测到重音时中心闪烁
+            if (beatDetected) {
+                ctx.beginPath();
+                ctx.arc(0, 0, baseRadius * 0.25, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${rotationAngle * 100}, 100%, 70%, 0.9)`;
+                ctx.shadowBlur = GLOW_INTENSITY + 25;
+                ctx.shadowColor = `hsla(${rotationAngle * 100}, 100%, 60%, 1)`;
+                ctx.fill();
+                beatDetected = false; // 重置检测标志
+            }
+
+            ctx.restore();
+        }
+        
+        // ========== 绘制背景粒子效果 ==========
+        function drawBackgroundParticles() {
+            const time = Date.now() * 0.001;
+            
+            ctx.save();
+            
+            for (let i = 0; i < 50; i++) {
+                const x = (Math.sin(i * 0.5 + time) * 0.5 + 0.5) * canvas.width;
+                const y = (Math.cos(i * 0.3 + time * 0.7) * 0.5 + 0.5) * canvas.height;
+                const size = 1 + Math.sin(i + time * 2) * 1;
+                const alpha = 0.3 + Math.sin(i * 0.2 + time) * 0.2;
+                
+                ctx.fillStyle = `rgba(100, 150, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+        
+        // ========== FPS计算与自适应降级 ==========
+        function updateFPS(currentTime) {
+            frameCount++;
+            
+            if (currentTime - lastTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastTime = currentTime;
+                
+                document.getElementById('fps').textContent = `FPS: ${fps}`;
+                
+                // 自适应降级（128 -> 64）
+                if (fps < 30 && targetSpectrumLength > 64) {
+                    // FPS低于30，降级到64
+                    targetSpectrumLength = 64;
+                    document.getElementById('freqBins').textContent = '64 (已降级)';
+                } else if (fps > 50 && targetSpectrumLength < 128) {
+                    // FPS高于50，恢复到128
+                    targetSpectrumLength = 128;
+                    document.getElementById('freqBins').textContent = '128';
+                }
+            }
+        }
+        
+        // ========== 主渲染循环 ==========
+        function renderLoop(currentTime) {
+            // FPS计算
+            updateFPS(currentTime);
+            
+            // 获取音频数据 (每帧只更新一次)
+            let bassEnergy = 0;
+            let volume = 0;
+            if (isPlaying && analyser) {
+                analyser.getByteFrequencyData(spectrumData);
+                analyser.getByteTimeDomainData(waveformData);
+                
+                // 计算低频能量用于粒子生成
+                for (let i = 0; i < 10; i++) {
+                    bassEnergy += spectrumData[i];
+                }
+                bassEnergy /= 10;
+                
+                // 计算整体音量
+                for (let i = 0; i < targetSpectrumLength; i++) {
+                    volume += spectrumData[i];
+                }
+                volume = Math.floor((volume / targetSpectrumLength) / 255 * 100);
+                
+                // 生成新粒子
+                spawnParticles(bassEnergy, currentTime);
+            }
+            
+            // 更新旋转角度
+            rotationAngle += 0.02;
+            
+            // 清空画布
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制背景
+            drawBackgroundParticles();
+            
+            // 绘制圆形频谱 (底层)
+            drawCircularSpectrum();
+            
+            // 绘制频谱柱状图
+            drawSpectrum();
+            
+            // 绘制波形图
+            drawWaveform();
+            
+            // 更新和绘制粒子（传递当前能量让速度随音乐变化）
+            updateParticles(bassEnergy);
+            drawParticles();
+            
+            // 更新信息显示 (每帧更新，更流畅)
+            let activeCount = 0;
+            for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+                if (particlePool[i].active) activeCount++;
+            }
+            document.getElementById('particleCount').textContent = activeCount;
+            document.getElementById('volume').textContent = volume;
+            document.getElementById('bassEnergy').textContent = Math.floor(bassEnergy);
+            
+            // 更新进度条和时间 (播放或暂停时都更新，只要不是正在拖拽)
+            if (audioBuffer && !isDraggingProgress) {
+                let currentTime;
+                if (isPlaying) {
+                    // 播放中：实时计算
+                    currentTime = audioContext.currentTime - startTime;
+                } else if (isPaused) {
+                    // 暂停中：使用pauseTime
+                    currentTime = pauseTime;
+                } else {
+                    currentTime = 0;
+                }
+                const progress = Math.min(currentTime / audioBuffer.duration, 1);
+                updateProgressUI(progress);
+                updateTimeDisplay(currentTime, audioBuffer.duration);
+            }
+            
+            // 继续循环
+            animationId = requestAnimationFrame(renderLoop);
+        }
+        
+        // ========== 启动 ==========
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
